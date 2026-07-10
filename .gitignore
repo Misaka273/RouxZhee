@@ -53,6 +53,8 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+pnpm-lock.yaml
+pnpm-workspace.yaml
 
 /**/.vitepress/cache/*
 pagefind/
