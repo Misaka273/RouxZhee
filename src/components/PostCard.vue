@@ -57,9 +57,25 @@
       </h3>
 
       <!-- 📝 描述 -->
-      <p v-if="post.description" class="post-description">
-        {{ post.description }}
-      </p>
+      <div
+        v-if="post.description"
+        class="post-description-wrapper"
+      >
+        <p
+          class="post-description"
+          @mouseenter="handleDescriptionEnter"
+          @mouseleave="handleDescriptionLeave"
+        >
+          {{ post.description }}
+        </p>
+        <div
+          class="post-description-tooltip"
+          :class="{ show: showTooltip }"
+          role="tooltip"
+        >
+          {{ post.description }}
+        </div>
+      </div>
 
       <!-- 📅 发布时间 -->
       <time class="post-date" :datetime="post.date">
@@ -78,6 +94,7 @@
 <script setup lang="ts">
 /* 🔗 文档内容卡片组件脚本 */
 
+import { ref } from 'vue';
 import type { Post } from '../types/post';
 import { generateSrcSet } from '../utils/image';
 
@@ -87,6 +104,17 @@ interface Props {
 }
 
 defineProps<Props>();
+
+/* 📝 描述气泡显示 */
+const showTooltip = ref(false);
+
+const handleDescriptionEnter = () => {
+  showTooltip.value = true;
+};
+
+const handleDescriptionLeave = () => {
+  showTooltip.value = false;
+};
 
 /* 📅 日期格式化函数 */
 const formatDate = (dateStr: string): string => {
@@ -151,6 +179,7 @@ const handleImageError = (event: Event) => {
   &:hover {
     transform: var(--card-transform-hover);
     box-shadow: var(--card-shadow-hover);
+    z-index: 10;
 
     .post-cover-wrapper {
       .post-cover {
@@ -263,6 +292,11 @@ const handleImageError = (event: Event) => {
     }
 
     /* 📝 描述 */
+    .post-description-wrapper {
+      position: relative;
+      display: block;
+    }
+
     .post-description {
       margin: 0;
       font-size: var(--card-description-font-size);
@@ -272,6 +306,48 @@ const handleImageError = (event: Event) => {
       -webkit-line-clamp: var(--card-description-clamp);
       -webkit-box-orient: vertical;
       overflow: hidden;
+    }
+
+    .post-description-tooltip {
+      position: absolute;
+      bottom: calc(100% + 10px);
+      left: 50%;
+      transform: translateX(-50%) scale(0.8);
+      padding: 8px 12px;
+      width: max-content;
+      max-width: min(320px, calc(100vw - 2rem));
+      background: var(--tooltip-bg);
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      color: var(--tooltip-text);
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      text-align: left;
+      white-space: normal;
+      word-break: break-word;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.25s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      z-index: 100;
+      pointer-events: none;
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: auto;
+        bottom: -6px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 6px 6px 0 6px;
+        border-style: solid;
+        border-color: var(--tooltip-bg) transparent transparent transparent;
+      }
+
+      &.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) scale(1);
+      }
     }
 
     /* 📅 发布时间 */
