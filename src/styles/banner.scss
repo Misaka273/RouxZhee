@@ -188,8 +188,11 @@
     max-height: 200px;
     min-height: 80px;
     margin-bottom: -1px;
-    z-index: 0;
+    z-index: 1; // ◀️ 位于背景层之上，避免背景切换时被 ::after 覆盖
     pointer-events: none;
+    will-change: transform;
+    backface-visibility: hidden;
+    transform: translateZ(0);
 
     .parallax {
       .wave-layer {
