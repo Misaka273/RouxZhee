@@ -117,8 +117,33 @@ import { ref, onMounted } from 'vue';
 /* 🌗 响应式状态 - 是否暗色模式 */
 const isDark = ref(false);
 
+/* 🚦 切换动画进行中的锁，防止快速重复点击导致状态错乱 */
+let isTransitioning = false;
+
+/* 🎬 当前进行中的过渡/动画，用于清理残留状态 */
+let activeTransition: ViewTransition | null = null;
+let activeAnimation: Animation | null = null;
+
+/* 🧹 清理未完成的 View Transition，避免多次切换后伪元素残留导致白屏 */
+function cleanupActiveTransition() {
+  if (activeAnimation) {
+    activeAnimation.cancel();
+    activeAnimation = null;
+  }
+  if (activeTransition) {
+    try {
+      activeTransition.skipTransition();
+    } catch {
+      // 过渡已结束时可忽略
+    }
+    activeTransition = null;
+  }
+  document.documentElement.removeAttribute('data-theme-transition');
+}
+
 /* 🎯 处理切换 */
 async function handleToggle(e: MouseEvent) {
+  if (isTransitioning) return;
   const btn = e.currentTarget as HTMLElement;
   const rect = btn.getBoundingClientRect();
   const x = rect.left + rect.width / 2;
@@ -126,46 +151,70 @@ async function handleToggle(e: MouseEvent) {
 
   // 🌊 检查是否支持 View Transition API
   if ('startViewTransition' in document && window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
-    // 计算涟漪半径
-    const maxRadius = Math.hypot(
-      Math.max(x, window.innerWidth - x),
-      Math.max(y, window.innerHeight - y)
-    );
+    isTransitioning = true;
 
-    // 记录当前主题状态（切换前）
-    const wasDark = isDark.value;
+    try {
+      // 清理上一次可能未完全结束的过渡
+      cleanupActiveTransition();
 
-    // 🎨 切换主题
-    const transition = (document as any).startViewTransition(async () => {
-      isDark.value = !isDark.value;
+      // 计算涟漪半径
+      const maxRadius = Math.hypot(
+        Math.max(x, window.innerWidth - x),
+        Math.max(y, window.innerHeight - y)
+      );
+
+      // 记录当前主题状态（切换前）
+      const wasDark = isDark.value;
+      const html = document.documentElement;
+
+      // 切换方向标记（在 DOM 更新前设置，供 CSS 层级选择器使用）
+      html.dataset.themeTransition = wasDark ? 'to-light' : 'to-dark';
+
+      // 🎨 切换主题 — 必须使用同步回调，避免 async 导致新快照延迟捕获而闪白屏
+      const transition = document.startViewTransition(() => {
+        isDark.value = !isDark.value;
+        applyTheme();
+        saveThemePreference();
+      });
+      activeTransition = transition;
+
+      await transition.ready;
+
+      // 🌊 执行 clip-path 动画
+      // 如果切换到暗色：新视图（暗色）从 0 展开到最大
+      // 如果切换到亮色：旧视图（暗色）从最大收缩到 0
+      const clipPath = [
+        `circle(0px at ${x}px ${y}px)`,
+        `circle(${maxRadius}px at ${x}px ${y}px)`,
+      ];
+
+      // 切换到暗色：新视图展开；切换到亮色：旧视图收缩
+      const animateOptions = wasDark
+        ? { clipPath: [...clipPath].reverse(), pseudoElement: '::view-transition-old(root)' }
+        : { clipPath, pseudoElement: '::view-transition-new(root)' };
+
+      const animation = document.documentElement.animate(
+        { clipPath: animateOptions.clipPath },
+        {
+          duration: 600,
+          easing: 'ease-in',
+          // backwards 确保首帧立即应用 clip-path，避免动画启动前露出底层亮色
+          fill: 'both',
+          pseudoElement: animateOptions.pseudoElement,
+        }
+      );
+      activeAnimation = animation;
+
+      await animation.finished;
+      await transition.finished;
+    } catch (err) {
+      console.warn('主题切换动画失败:', err);
       applyTheme();
       saveThemePreference();
-    });
-
-    await transition.ready;
-
-    // 🌊 执行 clip-path 动画
-    // 如果切换到暗色：新视图（暗色）从 0 展开到最大
-    // 如果切换到亮色：旧视图（暗色）从最大收缩到 0
-    const clipPath = [
-      `circle(0px at ${x}px ${y}px)`,
-      `circle(${maxRadius}px at ${x}px ${y}px)`,
-    ];
-
-    // 切换到暗色：新视图展开；切换到亮色：旧视图收缩
-    const animateOptions = wasDark
-      ? { clipPath: clipPath.reverse(), pseudoElement: '::view-transition-old(root)' }
-      : { clipPath, pseudoElement: '::view-transition-new(root)' };
-
-    document.documentElement.animate(
-      { clipPath: animateOptions.clipPath },
-      {
-        duration: 600,
-        easing: 'ease-in',
-        fill: 'forwards',
-        pseudoElement: animateOptions.pseudoElement,
-      }
-    );
+    } finally {
+      cleanupActiveTransition();
+      isTransitioning = false;
+    }
   } else {
     // 不支持 View Transition API，直接切换
     isDark.value = !isDark.value;

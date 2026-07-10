@@ -127,6 +127,11 @@ const seo = resolvePageSeo(
     box-sizing: border-box;
   }
 
+  html, body {
+    min-height: 100%;
+    background: var(--bg-color);
+  }
+
   body {
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
@@ -140,20 +145,17 @@ const seo = resolvePageSeo(
     mix-blend-mode: normal;
   }
 
-  /* 暗色模式切换时的层级控制 */
-  html.dark-mode::view-transition-old(root) {
-    z-index: 1;
-  }
-
-  html.dark-mode::view-transition-new(root) {
+  /*
+   * 切换方向驱动的层级控制（比依赖 .dark-mode 更可靠）
+   * 暗→亮：旧视图（暗色）在上层收缩；亮→暗：新视图（暗色）在上层展开
+   */
+  html[data-theme-transition="to-light"]::view-transition-old(root),
+  html[data-theme-transition="to-dark"]::view-transition-new(root) {
     z-index: 9999;
   }
 
-  html:not(.dark-mode)::view-transition-old(root) {
-    z-index: 9999;
-  }
-
-  html:not(.dark-mode)::view-transition-new(root) {
+  html[data-theme-transition="to-light"]::view-transition-new(root),
+  html[data-theme-transition="to-dark"]::view-transition-old(root) {
     z-index: 1;
   }
 
