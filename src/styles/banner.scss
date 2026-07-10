@@ -23,7 +23,7 @@
   justify-content: center;
   overflow: hidden;
   background: var(--banner-gradient);
-  z-index: 999;
+  z-index: var(--banner-z-index, 4);
 
   // 🖼️ 双层背景实现交叉淡入淡出
   &::before {
@@ -188,7 +188,7 @@
     max-height: 200px;
     min-height: 80px;
     margin-bottom: -1px;
-    z-index: 3;
+    z-index: 0;
     pointer-events: none;
 
     .parallax {
