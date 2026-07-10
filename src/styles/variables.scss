@@ -183,6 +183,34 @@
   --rouxzhee-runtime-hour-color: #06b6d4;
   --rouxzhee-runtime-minute-color: #ec4899;
   --rouxzhee-runtime-second-color: #8b5cf6;
+
+  // 🌀 滚动条样式
+  --rouxzhee-scrollbar-width: 0.35rem;
+  --rouxzhee-scrollbar-height: 0.35rem;
+  --rouxzhee-scrollbar-track-radius: 2em;
+  --rouxzhee-scrollbar-thumb-radius: 2em;
+  --rouxzhee-scrollbar-animation-duration: 3s;
+  --rouxzhee-scrollbar-animation-duration-hover: 2s;
+  --rouxzhee-scrollbar-light-gradient: linear-gradient(
+    120deg,
+    rgba(51, 255, 204, 1),
+    rgba(255, 255, 255, 0.8),
+    rgba(255, 91, 91, 1),
+    rgba(255, 255, 255, 0.8),
+    rgba(102, 174, 255, 1),
+    rgba(51, 255, 204, 1)
+  );
+  --rouxzhee-scrollbar-light-hover-gradient: linear-gradient(
+    120deg,
+    rgba(255, 91, 206, 0.9),
+    rgba(0, 204, 255, 0.9),
+    rgba(91, 107, 255, 0.9),
+    rgba(0, 204, 255, 0.9),
+    rgba(51, 92, 255, 0.9),
+    rgba(255, 91, 206, 0.9)
+  );
+  --rouxzhee-scrollbar-firefox-thumb: rgba(51, 255, 204, 0.8);
+  --rouxzhee-scrollbar-firefox-track: transparent;
 }
 
 // 🌠 暗色模式
@@ -250,6 +278,27 @@
   --search-sub-badge-bg: rgba(34, 211, 238, 0.12);
   --search-highlight-bg: rgba(34, 211, 238, 0.2);
   --search-highlight-color: #22d3ee;
+
+  // 🌀 滚动条样式 - 暗色模式
+  --rouxzhee-scrollbar-dark-gradient: linear-gradient(
+    120deg,
+    rgb(0, 38, 255),
+    rgba(0, 225, 255, 0.9),
+    rgba(255, 80, 160, 1),
+    rgba(0, 225, 255, 0.9),
+    rgba(120, 100, 255, 1),
+    rgb(0, 38, 255)
+  );
+  --rouxzhee-scrollbar-dark-hover-gradient: linear-gradient(
+    120deg,
+    rgba(255, 0, 242, 0.9),
+    rgba(17, 0, 255, 0.9),
+    rgba(255, 80, 160, 0.9),
+    rgba(255, 0, 242, 0.9),
+    rgba(160, 120, 255, 0.9),
+    rgba(0, 255, 180, 0.9)
+  );
+  --rouxzhee-scrollbar-firefox-thumb: rgba(0, 225, 255, 0.7);
 }
 
 // ========================================

@@ -1,0 +1,69 @@
+// 🕊️白木 原创开发 🔗gl.baimu.live
+// 全局滚动条样式 - 自定义 WebKit 滚动条与 Firefox 滚动条
+
+// 🎨 引入全局 SCSS 变量
+@use 'variables.scss' as *;
+
+/* 🌀 全局页面与代码块滚动条尺寸 */
+::-webkit-scrollbar {
+  width: var(--rouxzhee-scrollbar-width);
+  height: var(--rouxzhee-scrollbar-height);
+}
+
+/* 🌀 滚动条轨道 */
+::-webkit-scrollbar-track {
+  border-radius: var(--rouxzhee-scrollbar-track-radius);
+  background: transparent;
+}
+
+/* ✨ 滚动条流光动画 */
+@keyframes rouxzhee-scrollbar-glow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+/* 🌅 亮色模式 - 滚动条滑块 */
+html:not(.dark-mode) ::-webkit-scrollbar-thumb {
+  background: var(--rouxzhee-scrollbar-light-gradient);
+  background-size: 200% 200%;
+  animation: rouxzhee-scrollbar-glow var(--rouxzhee-scrollbar-animation-duration) linear infinite alternate;
+  border-radius: var(--rouxzhee-scrollbar-thumb-radius);
+  background-clip: padding-box;
+}
+
+/* 🌅 亮色模式 - 悬停 */
+html:not(.dark-mode) ::-webkit-scrollbar-thumb:hover {
+  background: var(--rouxzhee-scrollbar-light-hover-gradient);
+  background-size: 200% 200%;
+  animation: rouxzhee-scrollbar-glow var(--rouxzhee-scrollbar-animation-duration-hover) linear infinite alternate;
+  border-radius: var(--rouxzhee-scrollbar-thumb-radius);
+  background-clip: padding-box;
+}
+
+/* 🌆 暗色模式 - 滚动条滑块 */
+html.dark-mode ::-webkit-scrollbar-thumb {
+  background: var(--rouxzhee-scrollbar-dark-gradient);
+  background-size: 200% 200%;
+  animation: rouxzhee-scrollbar-glow var(--rouxzhee-scrollbar-animation-duration) linear infinite alternate;
+  border-radius: var(--rouxzhee-scrollbar-thumb-radius);
+  background-clip: padding-box;
+}
+
+/* 🌆 暗色模式 - 悬停 */
+html.dark-mode ::-webkit-scrollbar-thumb:hover {
+  background: var(--rouxzhee-scrollbar-dark-hover-gradient);
+  background-size: 200% 200%;
+  animation: rouxzhee-scrollbar-glow var(--rouxzhee-scrollbar-animation-duration-hover) linear infinite alternate;
+  border-radius: var(--rouxzhee-scrollbar-thumb-radius);
+  background-clip: padding-box;
+}
+
+/* 🦊 Firefox 滚动条支持 */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--rouxzhee-scrollbar-firefox-thumb) var(--rouxzhee-scrollbar-firefox-track);
+}
