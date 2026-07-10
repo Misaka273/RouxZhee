@@ -25,30 +25,10 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted } from 'vue';
-
 /* 🎯 打开搜索 */
 function openSearch() {
   window.dispatchEvent(new CustomEvent('rouxzhee-open-search'));
 }
-
-/* ⌨️ 全局键盘快捷键 */
-function handleGlobalKeyDown(event: KeyboardEvent) {
-  /* ⌨️ Ctrl/Cmd + K 打开搜索 */
-  if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
-    event.preventDefault();
-    openSearch();
-  }
-}
-
-/* 🚀 生命周期钩子 */
-onMounted(() => {
-  document.addEventListener('keydown', handleGlobalKeyDown);
-});
-
-onUnmounted(() => {
-  document.removeEventListener('keydown', handleGlobalKeyDown);
-});
 </script>
 
 <style scoped lang="scss">

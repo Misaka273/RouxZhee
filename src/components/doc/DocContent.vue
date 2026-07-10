@@ -4,9 +4,9 @@
 -->
 
 <template>
-  <div class="doc-page">
+  <div class="doc-page" data-pagefind-body>
     <!-- ✨ 装饰元素 -->
-    <div class="doc-decorations">
+    <div class="doc-decorations" data-pagefind-ignore>
       <div class="decoration-circle circle-1"></div>
       <div class="decoration-circle circle-2"></div>
       <div class="decoration-circle circle-3"></div>
@@ -18,6 +18,7 @@
     <aside
       v-if="showToc && toc.length"
       class="doc-sidebar"
+      data-pagefind-ignore
       :class="{ 'is-faded': isSidebarFaded }"
       @mouseenter="handleSidebarMouseEnter"
       @mouseleave="handleSidebarMouseLeave"
@@ -43,6 +44,7 @@
     <aside
       v-if="categoryDocs.length > 0 || (isRootDoc && categoryTree.length > 0)"
       class="category-sidebar"
+      data-pagefind-ignore
       :class="{ 'is-faded': isSidebarFaded }"
       @mouseenter="handleSidebarMouseEnter"
       @mouseleave="handleSidebarMouseLeave"
@@ -98,14 +100,14 @@
     <!-- 🎨 页面标题 -->
     <h1 class="doc-page-title">
       <span v-if="titleIcon" class="title-icon">{{ titleIcon }}</span>
-      <span class="title-text">{{ meta.title }}</span>
+      <span class="title-text" data-pagefind-meta="title">{{ meta.title }}</span>
     </h1>
 
     <!-- 📄 文档主体 -->
     <main class="doc-main">
       <div class="doc-container">
         <!-- 📋 元信息卡片 -->
-        <div v-if="showMeta" class="doc-meta-card">
+        <div v-if="showMeta" class="doc-meta-card" data-pagefind-ignore>
           <!-- 📂 分类路径面包屑 -->
           <div v-if="categoryFullPath" class="meta-category-path">
             <span class="meta-icon">📂</span>
@@ -155,7 +157,7 @@
         <article class="doc-content rz-content" v-html="htmlContent" ref="contentRef"></article>
 
         <!-- 🔗 文档导航 - 上一篇/下一篇 -->
-        <nav class="doc-navigation">
+        <nav class="doc-navigation" data-pagefind-ignore>
           <!-- ⬅️ 上一篇 -->
           <a
             v-if="navigation?.prev"

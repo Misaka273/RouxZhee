@@ -4,6 +4,7 @@
 // 基础布局组件 - 提供页面整体框架结构
 
 import FloatingToolbar from '../components/FloatingToolbar.vue';
+import SearchModal from '../components/SearchModal.vue';
 import SeoHead from '../components/seo/SeoHead.astro';
 import { seoConfig } from '../config/seo.config';
 import { resolvePageSeo } from '../utils/seo';
@@ -59,6 +60,9 @@ const seo = resolvePageSeo(
 
     <!-- 🧰 浮动工具栏 - 搜索/主题切换/回到顶部 -->
     <FloatingToolbar client:load="vue" />
+
+    <!-- 🔍 搜索弹窗 -->
+    <SearchModal client:load="vue" />
 
     <!-- 🔄 Service Worker 注册 - 离线缓存支持 -->
     <script is:inline>

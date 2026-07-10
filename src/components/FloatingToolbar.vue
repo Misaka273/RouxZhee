@@ -4,7 +4,7 @@
 -->
 
 <template>
-  <div class="rouxzhee-floating-toolbar">
+  <div class="rouxzhee-floating-toolbar" data-pagefind-ignore>
     <!-- 🔎 搜索按钮 -->
     <SearchButton />
 

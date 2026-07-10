@@ -6,6 +6,7 @@
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro build",
+    "postbuild": "pagefind --site dist && node scripts/sync-pagefind.mjs",
     "preview": "astro preview",
     "astro": "astro"
   },
@@ -15,6 +16,7 @@
     "vue": "^3.5.32"
   },
   "devDependencies": {
+    "pagefind": "^1.5.2",
     "sass": "^1.99.0",
     "terser": "^5.46.1",
     "typescript": "^5.9.3"
