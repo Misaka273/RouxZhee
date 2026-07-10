@@ -4,13 +4,31 @@
 // 基础布局组件 - 提供页面整体框架结构
 
 import FloatingToolbar from '../components/FloatingToolbar.vue';
+import SeoHead from '../components/seo/SeoHead.astro';
+import { seoConfig } from '../config/seo.config';
+import { resolvePageSeo } from '../utils/seo';
+import { getSiteUrl } from '../utils/site';
+import type { SeoPageInput } from '../types/seo';
 
 interface Props {
-  title: string;
+  /** 页面 SEO 配置（推荐） */
+  seo?: SeoPageInput;
+  /** 兼容旧用法：页面标题 */
+  title?: string;
+  /** 兼容旧用法：页面描述 */
   description?: string;
 }
 
-const { title, description = 'RouxZhee博客' } = Astro.props;
+const { seo: seoInput, title, description } = Astro.props;
+
+const seo = resolvePageSeo(
+  seoInput ?? {
+    title: title ?? seoConfig.defaultTitle,
+    description,
+  },
+  Astro.url.pathname,
+  Astro.site?.href.replace(/\/$/, '') || getSiteUrl()
+);
 ---
 
 <!DOCTYPE html>
@@ -18,9 +36,10 @@ const { title, description = 'RouxZhee博客' } = Astro.props;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>{title}</title>
+
+    <!-- 🔍 SEO 组件 -->
+    <SeoHead seo={seo} />
 
     <!-- ⚡ DNS 预解析 - 优化资源加载 -->
     <link rel="dns-prefetch" href="//fonts.googleapis.com" />
@@ -33,20 +52,6 @@ const { title, description = 'RouxZhee博客' } = Astro.props;
     <!-- 🔍 关键 CSS 预加载 - 优先渲染关键路径 -->
     <link rel="preload" as="style" href="/_astro/variables.scss" />
 
-    <!-- ⚡ 性能优化 meta 标签 -->
-    <meta name="theme-color" content="#0e7490" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-
-    <!-- 📱 移动端优化 -->
-    <meta name="format-detection" content="telephone=no" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-
-    <!-- 🌐 Open Graph 社交分享优化 -->
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
-    <meta property="og:site_name" content="RouxZhee博客" />
   </head>
   <body>
     <!-- 📄 页面内容 -->

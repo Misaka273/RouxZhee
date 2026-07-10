@@ -1,0 +1,53 @@
+---
+// 🕊️白木 原创开发 🔗gl.baimu.live
+// JSON-LD 结构化数据组件
+
+import type { ResolvedSeo } from '../../types/seo';
+import { seoConfig } from '../../config/seo.config';
+
+interface Props {
+  seo: ResolvedSeo;
+}
+
+const { seo } = Astro.props;
+
+const schema =
+  seo.type === 'article'
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: seo.title,
+        description: seo.description,
+        image: seo.absoluteImage,
+        datePublished: seo.publishedTime,
+        dateModified: seo.modifiedTime || seo.publishedTime,
+        author: {
+          '@type': 'Person',
+          name: seo.author || seoConfig.author,
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: seo.siteName,
+          logo: {
+            '@type': 'ImageObject',
+            url: seo.absoluteImage,
+          },
+        },
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': seo.absoluteUrl,
+        },
+        keywords: seo.tags?.join(', '),
+      }
+    : {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: seo.siteName,
+        description: seo.description,
+        url: seo.absoluteUrl,
+        image: seo.absoluteImage,
+        inLanguage: seo.locale.replace('_', '-'),
+      };
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

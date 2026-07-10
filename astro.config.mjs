@@ -23,8 +23,8 @@ export default defineConfig({
     })
   ],
 
-  // 🌐 站点配置（如果部署到生产环境，建议配置）
-  // site: 'https://gl.baimu.live',
+  // 🌐 站点 URL（全项目唯一配置入口，SEO / canonical / og:url 等均从此自动同步）
+  site: 'https://gl.baimu.live',
 
   // 📄 输出模式配置
   output: 'static',

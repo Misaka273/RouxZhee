@@ -16,6 +16,10 @@ export interface DocMeta {
   cover?: string;          // ◀️ 封面图片地址
   titleIcon?: string;      // ◀️ 标题图标
   updateDate?: string;     // ◀️ 更新日期
+  seoTitle?: string;       // ◀️ SEO 专用标题（覆盖 title）
+  seoDescription?: string; // ◀️ SEO 专用描述（覆盖 description）
+  ogImage?: string;        // ◀️ OG 配图（覆盖 cover / 默认配图）
+  noindex?: boolean;       // ◀️ 禁止搜索引擎索引
 }
 
 /* 🔗 大纲/目录项 */

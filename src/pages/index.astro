@@ -6,9 +6,19 @@
 import Layout from '../layouts/Layout.astro';
 import Banner from '../components/Banner.vue';
 import HomeContent from '../components/HomeContent.vue';
+import { bannerConfig } from '../config/banner.config';
+import { createPageSeo } from '../utils/seo';
+import { seoConfig } from '../config/seo.config';
+
+const seo = createPageSeo({
+  title: `${bannerConfig.title} - 首页`,
+  description: seoConfig.defaultDescription,
+  type: 'website',
+  useTitleTemplate: false,
+});
 ---
 
-<Layout title="RouxZhee - 首页">
+<Layout seo={seo}>
   <div class="home-page">
     <!-- 🎯 Banner 区域 (包含导航栏)  -->
     <Banner client:load="vue" />

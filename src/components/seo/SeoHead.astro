@@ -1,0 +1,59 @@
+---
+// 🕊️白木 原创开发 🔗gl.baimu.live
+// SEO Head 组件 - 统一管理 meta / OG / Twitter / canonical
+
+import type { ResolvedSeo } from '../../types/seo';
+import { getRobotsContent } from '../../utils/seo';
+import JsonLd from './JsonLd.astro';
+
+interface Props {
+  seo: ResolvedSeo;
+}
+
+const { seo } = Astro.props;
+const robotsContent = getRobotsContent(seo.noindex);
+---
+
+<!-- 基础 Meta -->
+<meta name="description" content={seo.description} />
+<link rel="canonical" href={seo.absoluteUrl} />
+<meta name="robots" content={robotsContent} />
+<meta name="author" content={seo.author} />
+<title>{seo.title}</title>
+
+<!-- 性能与移动端 -->
+<meta name="theme-color" content={seo.themeColor} />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="format-detection" content="telephone=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
+<!-- Open Graph -->
+<meta property="og:type" content={seo.type} />
+<meta property="og:title" content={seo.title} />
+<meta property="og:description" content={seo.description} />
+<meta property="og:site_name" content={seo.siteName} />
+<meta property="og:url" content={seo.absoluteUrl} />
+<meta property="og:image" content={seo.absoluteImage} />
+<meta property="og:locale" content={seo.locale} />
+
+{seo.type === 'article' && seo.publishedTime && (
+  <meta property="article:published_time" content={seo.publishedTime} />
+)}
+{seo.type === 'article' && seo.modifiedTime && (
+  <meta property="article:modified_time" content={seo.modifiedTime} />
+)}
+{seo.type === 'article' && seo.tags?.map((tag) => (
+  <meta property="article:tag" content={tag} />
+))}
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content={seo.twitter.card} />
+<meta name="twitter:title" content={seo.title} />
+<meta name="twitter:description" content={seo.description} />
+<meta name="twitter:image" content={seo.absoluteImage} />
+{seo.twitter.site && <meta name="twitter:site" content={seo.twitter.site} />}
+{seo.twitter.creator && <meta name="twitter:creator" content={seo.twitter.creator} />}
+
+<!-- JSON-LD 结构化数据 -->
+{seo.jsonLdEnabled && <JsonLd seo={seo} />}

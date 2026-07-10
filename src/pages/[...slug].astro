@@ -10,6 +10,7 @@ import { resolve, join, dirname } from 'path';
 import Layout from '../layouts/Layout.astro';
 import NavBar from '../components/Navbar.vue';
 import DocContent from '../components/doc/DocContent.vue';
+import { createPageSeo } from '../utils/seo';
 
 /* 📋 类型定义 */
 import type { DocMeta, TocItem, DocNavigation, CategoryDoc, CategoryItem } from '../types/doc';
@@ -495,6 +496,38 @@ if (existsSync(filePath)) {
       meta.cover = coverMatch[1].trim();
     }
 
+    // 🔽提取自定义 URL
+    const urlMatch = frontmatter.match(/url:\s*['"]?([^'"\r\n]+)['"]?/);
+    if (urlMatch) {
+      meta.url = urlMatch[1].trim();
+    }
+
+    // 🔽提取 SEO 专用字段
+    const seoTitleMatch = frontmatter.match(/seoTitle:\s*['"]?([^'"\r\n]+)['"]?/);
+    if (seoTitleMatch) {
+      meta.seoTitle = seoTitleMatch[1].trim();
+    }
+
+    const seoDescriptionMatch = frontmatter.match(/seoDescription:\s*['"]?([^'"\r\n]+)['"]?/);
+    if (seoDescriptionMatch) {
+      meta.seoDescription = seoDescriptionMatch[1].trim();
+    }
+
+    const ogImageMatch = frontmatter.match(/ogImage:\s*['"]?([^'"\r\n]+)['"]?/);
+    if (ogImageMatch) {
+      meta.ogImage = ogImageMatch[1].trim();
+    }
+
+    const updateDateMatch = frontmatter.match(/updateDate:\s*['"]?([^'"\r\n]+)['"]?/);
+    if (updateDateMatch) {
+      meta.updateDate = updateDateMatch[1].trim();
+    }
+
+    const noindexMatch = frontmatter.match(/noindex:\s*(true|false)/);
+    if (noindexMatch) {
+      meta.noindex = noindexMatch[1] === 'true';
+    }
+
     // 🔽提取标题图标
     const titleIconMatch = frontmatter.match(/titleIcon:\s*['"]?([^'"\r\n]+)['"]?/);
     if (titleIconMatch) {
@@ -568,9 +601,24 @@ const categoryName = categoryPath.split('/').pop() || categoryPath;
 // 🔽判断是否在根目录
 const isRootDoc = categoryPath === '.' || categoryPath === '';
 const categoryTree = isRootDoc ? getAllCategories(docDir, filePath) : [];
+
+const seo = createPageSeo({
+  title: meta.title,
+  description: meta.description,
+  seoTitle: meta.seoTitle,
+  seoDescription: meta.seoDescription,
+  image: meta.cover,
+  ogImage: meta.ogImage,
+  canonical: meta.url || Astro.url.pathname,
+  type: 'article',
+  publishedTime: meta.date,
+  modifiedTime: meta.updateDate || meta.date,
+  tags: meta.tags,
+  noindex: meta.noindex,
+});
 ---
 
-<Layout title={meta.title} description={meta.description}>
+<Layout seo={seo}>
   <!-- 🧭 导航栏 -->
   <NavBar client:load />
 
