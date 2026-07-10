@@ -82,6 +82,16 @@ const seo = resolvePageSeo(
         });
       }
     </script>
+
+    <!-- ✨ 光标拖尾特效 -->
+    <script>
+      import { useCursorTrail } from '../components/CursorTrail/useCursorTrail';
+      import { cursorTrailConfig } from '../config/cursorTrail.config';
+
+      if (cursorTrailConfig.enabled) {
+        useCursorTrail();
+      }
+    </script>
   </body>
 </html>
 
@@ -93,6 +103,7 @@ const seo = resolvePageSeo(
   @use '../styles/home-page.scss' as *;
   @use '../styles/navbar.scss' as *;
   @use '../styles/scrollbar.scss' as *;
+  @use '../components/CursorTrail/CursorTrail.scss' as *;
 
   // 🛡️ 防止 Vue 组件闪烁 - 骨架屏样式
   astro-island[client\:only="vue"] {

@@ -1,0 +1,28 @@
+// 🕊️白木 原创开发 🔗gl.baimu.live
+// 光标拖尾特效样式
+
+/* 光标拖尾动画容器 */
+#rouxzhee-cursor-trail-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none; /* 不阻塞鼠标操作 */
+  z-index: var(--cursor-trail-z-index); /* 确保在最上层 */
+}
+
+/* 流光小星星样式 */
+#rouxzhee-cursor-trail-container .rouxzhee-cursor-trail-star {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  color: var(--cursor-trail-star-color);
+  pointer-events: none;
+  transform-style: preserve-3d;
+}
+
+#rouxzhee-cursor-trail-container .rouxzhee-cursor-trail-star::before {
+  content: var(--cursor-trail-star-character);
+  color: inherit;
+  inset: 0;
+  position: absolute;
+  text-shadow: var(--cursor-trail-glow);
+}

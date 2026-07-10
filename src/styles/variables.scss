@@ -323,6 +323,18 @@
   --banner-z-index: 4;
   --content-z-index: 1;
   --theme-transition-z-index: 2;
+
+  // ✨ 光标拖尾特效
+  --cursor-trail-z-index: 9999;
+  --cursor-trail-star-color: rgb(4, 0, 255);
+  --cursor-trail-star-character: "✦";
+  --cursor-trail-glow: 0 0 1em rgba(133, 182, 255, 0.384);
+  --cursor-trail-color-1: #E23636;
+  --cursor-trail-color-2: #001affff;
+  --cursor-trail-color-3: #00ffeaff;
+  --cursor-trail-color-4: #ff009dff;
+  --cursor-trail-color-5: #ff9595ff;
+  --cursor-trail-color-6: #004370ff;
 }
 
 // ========================================
