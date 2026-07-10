@@ -92,6 +92,16 @@ const seo = resolvePageSeo(
         useCursorTrail();
       }
     </script>
+
+    <!-- 🖼️ 图片查看器 -->
+    <script>
+      import { useImageViewer } from '../components/ImageViewer/useImageViewer';
+      import { imageViewerConfig } from '../config/imageViewer.config';
+
+      if (imageViewerConfig.enabled) {
+        useImageViewer();
+      }
+    </script>
   </body>
 </html>
 
@@ -104,6 +114,7 @@ const seo = resolvePageSeo(
   @use '../styles/navbar.scss' as *;
   @use '../styles/scrollbar.scss' as *;
   @use '../components/CursorTrail/CursorTrail.scss' as *;
+  @use '../components/ImageViewer/ImageViewer.scss' as *;
 
   // 🛡️ 防止 Vue 组件闪烁 - 骨架屏样式
   astro-island[client\:only="vue"] {

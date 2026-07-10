@@ -1,0 +1,235 @@
+// 🕊️白木 原创开发 🔗gl.baimu.live
+// 图片查看器样式
+
+// 全局 CSS 变量已统一由 src/styles/variables.scss 管理
+
+// ========================================
+// 🖼️ 图片查看器遮罩层
+// ========================================
+.rouxzhee-image-viewer__wrapper {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--rouxzhee-image-viewer-overlay-bg);
+  backdrop-filter: blur(var(--rouxzhee-image-viewer-overlay-blur));
+  -webkit-backdrop-filter: blur(var(--rouxzhee-image-viewer-overlay-blur));
+  z-index: var(--rouxzhee-image-viewer-z-index);
+  opacity: 0;
+  animation: rzx-image-viewer-fade-in var(--rouxzhee-image-viewer-transition-duration) ease forwards;
+
+  &--fade-out {
+    animation: rzx-image-viewer-fade-out var(--rouxzhee-image-viewer-transition-duration) ease forwards;
+  }
+}
+
+// ========================================
+// 🎨 图片画布
+// ========================================
+.rouxzhee-image-viewer__canvas {
+  position: relative;
+  max-width: var(--rouxzhee-image-viewer-canvas-max-width);
+  max-height: var(--rouxzhee-image-viewer-canvas-max-height);
+  border-radius: var(--rouxzhee-image-viewer-canvas-radius);
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+    max-height: var(--rouxzhee-image-viewer-canvas-max-height);
+    object-fit: contain;
+    border-radius: var(--rouxzhee-image-viewer-canvas-radius);
+    transition: transform var(--rouxzhee-image-viewer-transition-duration) ease;
+    pointer-events: none;
+  }
+
+  &--fullscreen {
+    max-width: var(--rouxzhee-image-viewer-canvas-fullscreen-max-width);
+    max-height: var(--rouxzhee-image-viewer-canvas-fullscreen-max-height);
+
+    img {
+      max-width: 100vw;
+      max-height: 100vh;
+    }
+  }
+}
+
+// ========================================
+// ❌ 关闭按钮
+// ========================================
+.rouxzhee-image-viewer__close {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  width: var(--rouxzhee-image-viewer-close-size);
+  height: var(--rouxzhee-image-viewer-close-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: var(--rouxzhee-image-viewer-close-bg);
+  color: var(--rouxzhee-image-viewer-close-color);
+  cursor: pointer;
+  transition: transform var(--transition-fast), background var(--transition-fast);
+  z-index: calc(var(--rouxzhee-image-viewer-z-index) + 1);
+
+  &:hover {
+    transform: scale(1.1);
+    background: var(--rouxzhee-image-viewer-close-hover-bg);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+// ========================================
+// 🎛️ 底部操作区
+// ========================================
+.rouxzhee-image-viewer__actions {
+  position: fixed;
+  left: 50%;
+  bottom: 32px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--rouxzhee-image-viewer-actions-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--rouxzhee-image-viewer-actions-border);
+  border-radius: var(--rouxzhee-image-viewer-actions-radius);
+  box-shadow: var(--rouxzhee-image-viewer-actions-shadow);
+  z-index: calc(var(--rouxzhee-image-viewer-z-index) + 1);
+}
+
+// ========================================
+// 🔘 操作按钮
+// ========================================
+.rouxzhee-image-viewer__action {
+  width: var(--rouxzhee-image-viewer-action-size);
+  height: var(--rouxzhee-image-viewer-action-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 12px;
+  background: var(--rouxzhee-image-viewer-action-bg);
+  color: var(--rouxzhee-image-viewer-action-color);
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+
+  &:hover:not(:disabled) {
+    background: var(--rouxzhee-image-viewer-action-hover-bg);
+    transform: translateY(-2px);
+  }
+
+  &:disabled {
+    color: var(--rouxzhee-image-viewer-action-disabled-color);
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+
+  svg {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+// ========================================
+// ℹ️ 图片计数信息
+// ========================================
+.rouxzhee-image-viewer__info {
+  position: fixed;
+  left: 50%;
+  bottom: 96px;
+  transform: translateX(-50%);
+  padding: 6px 14px;
+  background: var(--rouxzhee-image-viewer-info-bg);
+  color: var(--rouxzhee-image-viewer-info-color);
+  border-radius: var(--rouxzhee-image-viewer-info-radius);
+  font-size: 0.875rem;
+  font-family: var(--rouxzhee-font-family-mono);
+  pointer-events: none;
+  z-index: calc(var(--rouxzhee-image-viewer-z-index) + 1);
+}
+
+// ========================================
+// 🎬 动画
+// ========================================
+@keyframes rzx-image-viewer-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes rzx-image-viewer-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+// ========================================
+// 📱 响应式适配
+// ========================================
+@media (max-width: 768px) {
+  .rouxzhee-image-viewer__close {
+    top: 16px;
+    right: 16px;
+    width: 40px;
+    height: 40px;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .rouxzhee-image-viewer__actions {
+    bottom: 20px;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 14px;
+  }
+
+  .rouxzhee-image-viewer__action {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .rouxzhee-image-viewer__info {
+    bottom: 78px;
+    font-size: 0.8125rem;
+  }
+}

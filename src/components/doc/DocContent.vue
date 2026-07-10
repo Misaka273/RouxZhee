@@ -359,8 +359,8 @@ onMounted(() => {
         }
       });
 
-      /* 🖼️ 为带 title 的图片添加玻璃质感气泡提示 */
-      const images = contentRef.value.querySelectorAll('img[title]');
+      /* 🖼️ 为带 title 的图片添加玻璃质感气泡提示（排除代码块内的图片） */
+      const images = contentRef.value.querySelectorAll('img[title]:not(pre img):not(.code-block-wrapper img)');
       images.forEach((img) => {
         const title = img.getAttribute('title');
         if (!title) return;

@@ -442,6 +442,33 @@
   --code-block-line-number-color: #6c7086;
   --code-block-button-bg: #45475a;
   --code-block-button-hover: #585b70;
+
+  // 🖼️ 图片查看器
+  --rouxzhee-image-viewer-z-index: 9998;
+  --rouxzhee-image-viewer-overlay-bg: rgba(0, 0, 0, 0.85);
+  --rouxzhee-image-viewer-overlay-blur: 8px;
+  --rouxzhee-image-viewer-canvas-max-width: 90vw;
+  --rouxzhee-image-viewer-canvas-max-height: 80vh;
+  --rouxzhee-image-viewer-canvas-radius: 16px;
+  --rouxzhee-image-viewer-canvas-fullscreen-max-width: none;
+  --rouxzhee-image-viewer-canvas-fullscreen-max-height: 100%;
+  --rouxzhee-image-viewer-close-size: 48px;
+  --rouxzhee-image-viewer-close-bg: rgba(255, 255, 255, 0.12);
+  --rouxzhee-image-viewer-close-color: #ffffff;
+  --rouxzhee-image-viewer-close-hover-bg: rgba(255, 255, 255, 0.22);
+  --rouxzhee-image-viewer-actions-bg: rgba(30, 41, 59, 0.65);
+  --rouxzhee-image-viewer-actions-border: rgba(255, 255, 255, 0.12);
+  --rouxzhee-image-viewer-actions-radius: 16px;
+  --rouxzhee-image-viewer-actions-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --rouxzhee-image-viewer-action-size: 40px;
+  --rouxzhee-image-viewer-action-color: #ffffff;
+  --rouxzhee-image-viewer-action-bg: transparent;
+  --rouxzhee-image-viewer-action-hover-bg: rgba(255, 255, 255, 0.15);
+  --rouxzhee-image-viewer-action-disabled-color: rgba(255, 255, 255, 0.35);
+  --rouxzhee-image-viewer-info-color: rgba(255, 255, 255, 0.85);
+  --rouxzhee-image-viewer-info-bg: rgba(0, 0, 0, 0.35);
+  --rouxzhee-image-viewer-info-radius: 12px;
+  --rouxzhee-image-viewer-transition-duration: 0.3s;
 }
 
 // 🌠 暗色模式 - 卡片变量
