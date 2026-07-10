@@ -123,15 +123,29 @@ const handleImageError = (event: Event) => {
   /* 📦 基础布局 */
   display: flex;
   flex-direction: column;
+  position: relative;
   background: var(--glass-bg);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
   border-radius: var(--card-border-radius);
-  overflow: hidden;
   box-shadow: var(--card-shadow);
-  transition: all var(--transition-normal);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+  transform: translateZ(0);
+  will-change: transform, box-shadow;
   z-index: 5;
+
+  /* 🎯 扩展悬停触发区域到底部及左右边缘外侧，避免上移时鼠标离开导致抽搐 */
+  &::after {
+    content: '';
+    position: absolute;
+    left: -6px;
+    right: -6px;
+    bottom: -6px;
+    height: 12px;
+    pointer-events: auto;
+    z-index: -1;
+  }
 
   /* ✨ 悬停效果 */
   &:hover {
@@ -156,6 +170,7 @@ const handleImageError = (event: Event) => {
     width: 100%;
     aspect-ratio: var(--post-cover-aspect-ratio);
     overflow: hidden;
+    border-radius: var(--card-border-radius) var(--card-border-radius) 0 0;
     text-decoration: none;
 
     .post-cover {
@@ -226,6 +241,7 @@ const handleImageError = (event: Event) => {
     flex: 1;
     padding: var(--card-content-padding);
     gap: var(--card-content-gap);
+    border-radius: 0 0 var(--card-border-radius) var(--card-border-radius);
 
     /* 📌 标题 */
     .post-title {

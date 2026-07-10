@@ -144,8 +144,22 @@ const hasBeian = computed(() => {
   border: 1px solid var(--glass-border);
   border-radius: var(--card-border-radius);
   box-shadow: var(--card-shadow);
-  transition: all var(--transition-normal);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+  transform: translateZ(0);
+  will-change: transform, box-shadow;
   z-index: 5;
+
+  /* 🎯 扩展悬停触发区域到底部及左右边缘外侧，避免上移时鼠标离开导致抽搐 */
+  &::after {
+    content: '';
+    position: absolute;
+    left: -6px;
+    right: -6px;
+    bottom: -6px;
+    height: 12px;
+    pointer-events: auto;
+    z-index: -1;
+  }
 
   /* 🖼️ 背景图片容器 */
   .blogger-card-bg-wrapper {
