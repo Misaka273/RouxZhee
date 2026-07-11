@@ -469,6 +469,21 @@
   --rouxzhee-image-viewer-info-bg: rgba(0, 0, 0, 0.35);
   --rouxzhee-image-viewer-info-radius: 12px;
   --rouxzhee-image-viewer-transition-duration: 0.3s;
+
+  // 👤 About 页面变量
+  --about-bg: var(--bg-color);
+  --about-card-bg: var(--card-bg);
+  --about-text-primary: var(--text-color);
+  --about-text-secondary: var(--text-secondary);
+  --about-gradient-start: #0e7490;
+  --about-gradient-end: #06b6d4;
+  --about-accent-pink: #ec4899;
+  --about-accent-purple: #8b5cf6;
+  --about-shadow: var(--card-shadow);
+  --about-shadow-hover: var(--card-shadow-hover);
+  --about-border-radius: var(--card-border-radius);
+  --about-border-radius-lg: 24px;
+  --about-transition: var(--transition-normal);
 }
 
 // 🌠 暗色模式 - 卡片变量
@@ -483,4 +498,13 @@
   --rouxzhee-runtime-hour-color: #67e8f9;
   --rouxzhee-runtime-minute-color: #f472b6;
   --rouxzhee-runtime-second-color: #a78bfa;
+
+  // 👤 About 页面变量 - 暗色模式
+  --about-card-bg: var(--card-bg);
+  --about-text-primary: var(--text-color);
+  --about-text-secondary: var(--text-secondary);
+  --about-gradient-start: #22d3ee;
+  --about-gradient-end: #0891b2;
+  --about-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+  --about-shadow-hover: 0 12px 36px rgba(0, 0, 0, 0.35);
 }

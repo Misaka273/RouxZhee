@@ -1,0 +1,1130 @@
+/* 🕊️白木 原创开发 🔗gl.baimu.live */
+/* 👤 个人介绍页面样式 */
+
+@use '../styles/variables.scss' as *;
+
+/* 🎯 页面包装器 */
+.about-page-wrapper {
+  min-height: 100vh;
+  background: var(--about-bg);
+  color: var(--about-text-primary);
+}
+
+/* 🎯 页面主容器 */
+.about-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: calc(var(--nav-height) + 24px) 20px 60px;
+  font-family: var(--font-body);
+
+  @media (max-width: 768px) {
+    padding: calc(var(--nav-height) + 16px) 16px 40px;
+  }
+}
+
+/* ========================================
+   一、首屏 · 身份锚定区
+   ======================================== */
+.about-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32px;
+  padding: 20px 0;
+  min-height: 200px;
+
+  .header-tags {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 280px;
+
+    &.left {
+      right: calc(50% + 80px);
+      align-items: flex-end;
+      text-align: right;
+    }
+
+    &.right {
+      left: calc(50% + 80px);
+      align-items: flex-start;
+      text-align: left;
+    }
+
+    .tag {
+      font-size: 14px;
+      color: var(--about-text-secondary);
+      padding: 8px 14px;
+      background: var(--about-card-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      box-shadow: var(--about-shadow);
+      transition: var(--about-transition);
+      animation: breathe-float 3s ease-in-out infinite;
+      white-space: nowrap;
+
+      &:nth-child(1) { animation-delay: 0s; }
+      &:nth-child(2) { animation-delay: 0.5s; }
+      &:nth-child(3) { animation-delay: 1s; }
+      &:nth-child(4) { animation-delay: 1.5s; }
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--about-shadow-hover);
+        animation-play-state: paused;
+      }
+    }
+  }
+
+  .header-avatar {
+    position: relative;
+    z-index: 2;
+
+    .avatar-wrapper {
+      position: relative;
+      width: 130px;
+      height: 130px;
+      margin: 0 auto;
+
+      &.circle-rotate {
+        .blogger-avatar {
+          border-radius: 50%;
+          transition: transform 0.3s ease;
+
+          &:hover {
+            animation: rotateClockwise 0.6s linear 1;
+          }
+        }
+      }
+
+      .blogger-avatar {
+        width: 100%;
+        height: 100%;
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
+        border-radius: 50%;
+        display: block;
+        box-shadow: var(--about-shadow);
+        border: 4px solid var(--about-card-bg);
+      }
+
+      .status-icon {
+        position: absolute;
+        bottom: 4px;
+        right: 4px;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        background: var(--about-card-bg);
+        border-radius: 50%;
+      }
+    }
+  }
+}
+
+/* 🏷️ 身份信息区 */
+.about-identity {
+  text-align: center;
+  margin-bottom: 40px;
+
+  .identity-name {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--about-text-primary);
+    font-family: var(--font-heading);
+
+    @media (max-width: 768px) {
+      font-size: 1.875rem;
+    }
+  }
+
+  .identity-handle {
+    font-size: 1rem;
+    color: var(--about-text-secondary);
+    margin-bottom: 8px;
+  }
+
+  .identity-role {
+    font-size: 1rem;
+    color: var(--primary-color);
+    font-weight: 500;
+    margin-bottom: 16px;
+  }
+
+  .identity-value {
+    max-width: 640px;
+    margin: 0 auto 24px;
+    font-size: 1.125rem;
+    line-height: 1.7;
+    color: var(--about-text-primary);
+  }
+
+  .identity-stats {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border: 1px solid var(--glass-border);
+      border-radius: 999px;
+      box-shadow: var(--about-shadow);
+
+      .stat-icon {
+        font-size: 1.125rem;
+      }
+
+      .stat-value {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--about-text-primary);
+      }
+
+      .stat-label {
+        font-size: 0.875rem;
+        color: var(--about-text-secondary);
+      }
+    }
+  }
+}
+
+/* 💳 介绍卡片 */
+.intro-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 48px;
+
+  .intro-card {
+    border-radius: var(--about-border-radius-lg);
+    padding: 32px;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: var(--about-transition);
+
+    &:hover {
+      transform: var(--card-transform-hover);
+      box-shadow: var(--about-shadow-hover);
+    }
+
+    &.gradient-card {
+      background: linear-gradient(135deg, var(--about-gradient-start), var(--about-gradient-end));
+      color: white;
+
+      .greeting {
+        font-size: 0.875rem;
+        opacity: 0.9;
+        margin-bottom: 8px;
+      }
+
+      .name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+
+      .role {
+        font-size: 0.875rem;
+        opacity: 0.9;
+      }
+    }
+
+    &.text-card {
+      background: var(--about-card-bg);
+      box-shadow: var(--about-shadow);
+      border: 1px solid var(--glass-border);
+
+      .label {
+        font-size: 0.75rem;
+        color: var(--about-text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 8px;
+      }
+
+      .title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--about-text-primary);
+        margin-bottom: 16px;
+        line-height: 1.4;
+        font-family: var(--font-heading);
+      }
+
+      .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+
+        span {
+          font-size: 0.75rem;
+          padding: 4px 12px;
+          background: rgba(14, 116, 144, 0.1);
+          color: var(--primary-color);
+          border-radius: 12px;
+        }
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ========================================
+   二、故事钩子 · 共鸣区
+   ======================================== */
+.story-section {
+  margin-bottom: 48px;
+
+  .story-content {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 32px;
+    align-items: start;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .story-image-wrapper {
+    border-radius: var(--about-border-radius-lg);
+    overflow: hidden;
+    box-shadow: var(--about-shadow);
+
+    .story-image {
+      width: 100%;
+      height: auto;
+      display: block;
+      transition: transform 0.5s ease;
+
+      &:hover {
+        transform: scale(1.03);
+      }
+    }
+  }
+
+  .story-text {
+    background: var(--about-card-bg);
+    border-radius: var(--about-border-radius-lg);
+    padding: 32px;
+    box-shadow: var(--about-shadow);
+    border: 1px solid var(--glass-border);
+
+    .story-quote {
+      font-size: 1.25rem;
+      font-weight: 600;
+      line-height: 1.6;
+      color: var(--about-text-primary);
+      margin-bottom: 20px;
+      padding-left: 16px;
+      border-left: 4px solid var(--primary-color);
+      font-family: var(--font-heading);
+    }
+
+    .story-paragraphs {
+      margin-bottom: 20px;
+
+      p {
+        font-size: 0.9375rem;
+        line-height: 1.8;
+        color: var(--about-text-secondary);
+        margin-bottom: 12px;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+
+    .story-testimonial {
+      padding: 16px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border-radius: var(--about-border-radius);
+      border: 1px solid var(--glass-border);
+
+      .testimonial-author {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--primary-color);
+        margin-bottom: 6px;
+      }
+
+      .testimonial-content {
+        font-size: 0.875rem;
+        line-height: 1.6;
+        color: var(--about-text-secondary);
+        margin: 0;
+      }
+    }
+  }
+}
+
+/* ========================================
+   三、硬核履历 · 时间轴
+   ======================================== */
+.career-section {
+  margin-bottom: 48px;
+
+  .career-content {
+    background: var(--about-card-bg);
+    border-radius: var(--about-border-radius-lg);
+    padding: 32px;
+    box-shadow: var(--about-shadow);
+    border: 1px solid var(--glass-border);
+  }
+
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+
+    .timeline-item {
+      display: flex;
+      gap: 20px;
+
+      .timeline-marker {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 16px;
+        flex-shrink: 0;
+        padding-top: 6px;
+
+        .timeline-dot {
+          width: 14px;
+          height: 14px;
+          border-radius: 50%;
+          background: var(--primary-color);
+          box-shadow: 0 0 0 4px rgba(14, 116, 144, 0.15);
+        }
+
+        .timeline-line {
+          flex: 1;
+          width: 2px;
+          min-height: 40px;
+          background: linear-gradient(
+            to bottom,
+            rgba(14, 116, 144, 0.3),
+            rgba(14, 116, 144, 0.05)
+          );
+          margin-top: 8px;
+        }
+      }
+
+      .timeline-body {
+        flex: 1;
+        padding-bottom: 8px;
+
+        .timeline-meta {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 8px 16px;
+          margin-bottom: 12px;
+
+          .timeline-period {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            padding: 4px 10px;
+            background: rgba(14, 116, 144, 0.1);
+            border-radius: 8px;
+          }
+
+          .timeline-company {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--about-text-primary);
+          }
+
+          .timeline-role {
+            font-size: 0.875rem;
+            color: var(--about-text-secondary);
+          }
+        }
+
+        .timeline-highlights {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+
+          li {
+            position: relative;
+            padding-left: 16px;
+            font-size: 0.9375rem;
+            line-height: 1.7;
+            color: var(--about-text-secondary);
+            margin-bottom: 8px;
+
+            &::before {
+              content: '';
+              position: absolute;
+              left: 0;
+              top: 10px;
+              width: 6px;
+              height: 6px;
+              border-radius: 50%;
+              background: var(--about-accent-pink);
+            }
+
+            &:last-child {
+              margin-bottom: 0;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+/* ========================================
+   四、技能与工具箱（饼图风格）
+   ======================================== */
+.skills-section {
+  margin-bottom: 48px;
+
+  .skills-content {
+    display: grid;
+    grid-template-columns: minmax(260px, 360px) 1fr;
+    gap: 32px;
+    align-items: center;
+    background: var(--about-card-bg);
+    border-radius: var(--about-border-radius-lg);
+    padding: 32px;
+    box-shadow: var(--about-shadow);
+    border: 1px solid var(--glass-border);
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+      gap: 24px;
+      padding: 24px;
+    }
+  }
+
+  .skills-chart-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .skills-chart {
+    width: 100%;
+    max-width: 280px;
+    height: auto;
+    transform: rotate(-90deg);
+
+    .skills-chart-bg {
+      fill: none;
+      stroke: var(--glass-border);
+      stroke-width: 1;
+    }
+
+    .skills-chart-slice {
+      cursor: pointer;
+      transition: var(--about-transition);
+      opacity: 0.9;
+
+      &:hover,
+      &.active {
+        opacity: 1;
+        filter: brightness(1.1);
+        transform-origin: center;
+        transform: scale(1.04);
+      }
+    }
+
+    .skills-chart-hole {
+      fill: var(--about-card-bg);
+    }
+
+    .skills-chart-total,
+    .skills-chart-total-label {
+      transform: rotate(90deg);
+      transform-origin: center;
+      fill: var(--about-text-primary);
+      font-family: var(--font-heading);
+      pointer-events: none;
+    }
+
+    .skills-chart-total {
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .skills-chart-total-label {
+      font-size: 12px;
+      opacity: 0.7;
+    }
+  }
+
+  .skills-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .skill-legend-item {
+    padding: 16px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--about-border-radius);
+    transition: var(--about-transition);
+    cursor: pointer;
+
+    &:hover,
+    &.active {
+      transform: translateX(4px);
+      border-color: var(--primary-color);
+      box-shadow: var(--about-shadow-hover);
+    }
+
+    .legend-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+
+      .legend-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      .legend-name {
+        flex: 1;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--about-text-primary);
+        font-family: var(--font-heading);
+        margin: 0;
+      }
+
+      .legend-percentage {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: var(--primary-color);
+      }
+    }
+
+    .legend-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+
+      .legend-tag {
+        font-size: 0.8125rem;
+        padding: 4px 10px;
+        border-radius: 8px;
+        color: var(--about-text-secondary);
+        background: rgba(14, 116, 144, 0.08);
+
+        &.level-master {
+          background: rgba(236, 72, 153, 0.12);
+          color: var(--about-accent-pink);
+        }
+
+        &.level-proficient {
+          background: rgba(14, 116, 144, 0.12);
+          color: var(--primary-color);
+        }
+
+        &.level-plain {
+          background: rgba(245, 158, 11, 0.12);
+          color: #d97706;
+        }
+      }
+    }
+  }
+}
+
+/* ========================================
+   五、博主输出 · 影响力资产
+   ======================================== */
+.influence-section {
+  margin-bottom: 48px;
+
+  .influence-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+
+    @media (max-width: 1024px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (max-width: 640px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .influence-card {
+    background: var(--about-card-bg);
+    border-radius: var(--about-border-radius);
+    padding: 24px;
+    box-shadow: var(--about-shadow);
+    border: 1px solid var(--glass-border);
+    transition: var(--about-transition);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--about-shadow-hover);
+    }
+
+    .influence-card-title {
+      font-size: 0.875rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--about-text-primary);
+      font-family: var(--font-heading);
+    }
+  }
+
+  .stats-card {
+    .influence-stats {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+
+      .influence-stat {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+
+        .influence-stat-value {
+          font-size: 1.25rem;
+          font-weight: 700;
+          color: var(--primary-color);
+        }
+
+        .influence-stat-label {
+          font-size: 0.8125rem;
+          color: var(--about-text-secondary);
+        }
+      }
+    }
+  }
+
+  .links-card {
+    .influence-links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+
+      .influence-link {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        text-decoration: none;
+        color: var(--about-text-secondary);
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        transition: var(--about-transition);
+
+        &:hover {
+          color: var(--primary-color);
+          border-color: var(--primary-color);
+          transform: translateX(4px);
+        }
+
+        .link-icon {
+          flex-shrink: 0;
+        }
+
+        .link-text {
+          font-size: 0.875rem;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+
+  .recognition-card {
+    grid-column: 1 / -1;
+
+    @media (max-width: 640px) {
+      grid-column: auto;
+    }
+
+    .recognition-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+
+      li {
+        font-size: 0.875rem;
+        padding: 8px 14px;
+        background: rgba(139, 92, 246, 0.1);
+        color: var(--about-accent-purple);
+        border-radius: 999px;
+      }
+    }
+  }
+}
+
+/* ========================================
+   六、个性彩蛋区
+   ======================================== */
+.quirks-section {
+  margin-bottom: 48px;
+
+  .quirks-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .quirk-card {
+    background: var(--about-card-bg);
+    border-radius: var(--about-border-radius);
+    padding: 28px;
+    box-shadow: var(--about-shadow);
+    border: 1px solid var(--glass-border);
+    transition: var(--about-transition);
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--about-shadow-hover);
+    }
+
+    .quirk-icon {
+      display: inline-block;
+      font-size: 1.5rem;
+      margin-bottom: 12px;
+    }
+
+    .quirk-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--about-text-primary);
+      font-family: var(--font-heading);
+    }
+
+    .quirk-content {
+      font-size: 0.875rem;
+      line-height: 1.7;
+      color: var(--about-text-secondary);
+      margin: 0;
+    }
+  }
+}
+
+/* ========================================
+   底部联系信息
+   ======================================== */
+.about-footer {
+  text-align: center;
+  padding: 24px;
+  background: var(--about-card-bg);
+  border-radius: var(--about-border-radius);
+  box-shadow: var(--about-shadow);
+  border: 1px solid var(--glass-border);
+
+  .footer-line {
+    font-size: 0.875rem;
+    color: var(--about-text-secondary);
+    line-height: 1.6;
+    margin: 0 0 20px;
+  }
+
+  .footer-email {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--about-transition);
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .footer-images {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    justify-items: center;
+    max-width: 560px;
+    margin: 0 auto;
+
+    .footer-image-wrapper {
+      width: 100%;
+      max-width: 272px;
+      border-radius: var(--about-border-radius);
+      overflow: hidden;
+      box-shadow: var(--about-shadow);
+      transition: var(--about-transition);
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--about-shadow-hover);
+      }
+
+      /* 奇数最后一个居中，形成三角布局 */
+      &:nth-last-child(1):nth-child(odd) {
+        grid-column: 1 / -1;
+        justify-self: center;
+      }
+    }
+
+    .footer-image-link {
+      display: block;
+      width: 100%;
+      height: 100%;
+      text-decoration: none;
+      line-height: 0;
+    }
+
+    .footer-image {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+}
+
+/* ========================================
+   区块标题通用样式
+   ======================================== */
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: var(--about-text-primary);
+  font-family: var(--font-heading);
+
+  .icon {
+    font-size: 1.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: var(--about-text-secondary);
+    margin-left: 8px;
+  }
+}
+
+/* ========================================
+   响应式适配
+   ======================================== */
+@media (max-width: 768px) {
+  .about-header {
+    flex-direction: column;
+    gap: 16px;
+    min-height: auto;
+    padding: 10px 0;
+
+    .header-tags {
+      position: relative;
+      top: auto;
+      transform: none;
+      width: 100%;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+
+      &.left {
+        right: auto;
+        order: -2;
+        align-items: center;
+        text-align: center;
+      }
+
+      &.right {
+        left: auto;
+        order: 1;
+        align-items: center;
+        text-align: center;
+      }
+
+      .tag {
+        font-size: 12px;
+        padding: 6px 12px;
+      }
+    }
+
+    .header-avatar {
+      order: -1;
+
+      .avatar-wrapper {
+        width: 110px;
+        height: 110px;
+      }
+    }
+  }
+
+  .about-identity {
+    .identity-value {
+      font-size: 1rem;
+    }
+
+    .identity-stats {
+      .stat-item {
+        padding: 8px 12px;
+      }
+    }
+  }
+
+  .intro-cards {
+    .intro-card {
+      padding: 24px;
+      min-height: auto;
+
+      &.gradient-card {
+        .name {
+          font-size: 1.25rem;
+        }
+      }
+
+      &.text-card {
+        .title {
+          font-size: 1.25rem;
+        }
+      }
+    }
+  }
+
+  .story-section {
+    .story-text {
+      padding: 24px;
+
+      .story-quote {
+        font-size: 1.125rem;
+      }
+    }
+  }
+
+  .career-section {
+    .career-content {
+      padding: 24px;
+    }
+  }
+
+  .skills-section {
+    .skills-content {
+      padding: 24px;
+    }
+  }
+
+  .influence-section {
+    .influence-card {
+      padding: 20px;
+    }
+  }
+
+  .quirks-section {
+    .quirk-card {
+      padding: 24px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .about-page {
+    padding: calc(var(--nav-height) + 12px) 12px 32px;
+  }
+
+  .section-title {
+    flex-wrap: wrap;
+
+    .subtitle {
+      margin-left: 0;
+      width: 100%;
+    }
+  }
+}
+
+/* ========================================
+   动画
+   ======================================== */
+@keyframes breathe-float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  25% {
+    transform: translateY(-6px);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+  75% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes rotateClockwise {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.animate-delay-1 { animation-delay: 0.1s; }
+.animate-delay-2 { animation-delay: 0.2s; }
+.animate-delay-3 { animation-delay: 0.3s; }
+.animate-delay-4 { animation-delay: 0.4s; }
+.animate-delay-5 { animation-delay: 0.5s; }
+.animate-delay-6 { animation-delay: 0.6s; }
+.animate-delay-7 { animation-delay: 0.7s; }
+.animate-delay-8 { animation-delay: 0.8s; }
+.animate-delay-9 { animation-delay: 0.9s; }

@@ -1,0 +1,24 @@
+---
+// 🕊️白木 原创开发 🔗gl.baimu.live
+// 个人介绍页面入口
+
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.vue';
+import AboutPage from '../components/AboutPage.vue';
+import { createPageSeo } from '../utils/seo';
+import { aboutConfig } from '../config/about.config';
+
+const seo = createPageSeo({
+  title: `关于 ${aboutConfig.hero.name}`,
+  description: aboutConfig.hero.valueProposition,
+  type: 'website',
+});
+---
+
+<Layout seo={seo}>
+  <!-- 🧭 独立导航栏（About 页面没有 Banner） -->
+  <Navbar client:load="vue" />
+
+  <!-- 📄 个人介绍内容 -->
+  <AboutPage client:load="vue" />
+</Layout>
