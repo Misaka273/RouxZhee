@@ -125,7 +125,7 @@
   top: calc(var(--nav-height) + 20px);
   left: 20px;
   width: 240px;
-  z-index: 1;
+  z-index: 2;
   max-height: calc(100vh - var(--nav-height) - 60px);
   overflow-y: auto;
   scrollbar-width: thin;
@@ -137,6 +137,11 @@
   /* 🌫️ 淡出状态 - 50%透明度 */
   &.is-faded {
     opacity: 0.5;
+  }
+
+  /* 🖱️ 鼠标悬停时恢复不透明 */
+  &:hover {
+    opacity: 1;
   }
 
   &::-webkit-scrollbar {
@@ -223,7 +228,7 @@
   top: calc(var(--nav-height) + 20px);
   right: 20px;
   width: 240px;
-  z-index: 1;
+  z-index: 2;
   max-height: calc(100vh - var(--nav-height) - 60px);
   overflow-y: auto;
   scrollbar-width: thin;
@@ -235,6 +240,11 @@
   /* 🌫️ 淡出状态 - 50%透明度 */
   &.is-faded {
     opacity: 0.5;
+  }
+
+  /* 🖱️ 鼠标悬停时恢复不透明 */
+  &:hover {
+    opacity: 1;
   }
 
   &::-webkit-scrollbar {
