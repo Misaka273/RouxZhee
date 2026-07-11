@@ -6,7 +6,7 @@
 -->
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import Clock from './Clock.vue';
 import { navbarConfig, type NavLink } from '../config/navbar.config';
 
@@ -173,6 +173,9 @@ const SCROLL_THRESHOLD = navbarConfig.scroll.threshold;
  * 处理滚动事件，切换导航栏样式
  */
 const handleScroll = () => {
+  // 移动端底部底座无需切换滚动样式，避免桌面端 margin 样式泄漏导致偏移
+  if (isMobile.value) return;
+
   const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
   const newIsScrolled = scrollY > SCROLL_THRESHOLD;
 
@@ -186,6 +189,11 @@ const handleScroll = () => {
  * 强制检查初始滚动状态
  */
 const checkInitialScroll = () => {
+  if (isMobile.value) {
+    isScrolled.value = false;
+    return;
+  }
+
   const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
   isScrolled.value = scrollY > SCROLL_THRESHOLD;
 };
@@ -202,6 +210,30 @@ const toggleMobileMenu = () => {
  */
 const closeMobileMenu = () => {
   isMobileMenuOpen.value = false;
+  closeAllSubmenus();
+};
+
+/**
+ * 按 ESC 关闭移动端菜单
+ */
+const handleEscKey = (event: KeyboardEvent) => {
+  if (event.key === 'Escape' && isMobileMenuOpen.value) {
+    closeMobileMenu();
+  }
+};
+
+// 📱 打开移动端菜单时禁止页面滚动
+watch(isMobileMenuOpen, (isOpen) => {
+  if (typeof document === 'undefined') return;
+  document.body.style.overflow = isOpen ? 'hidden' : '';
+});
+
+/**
+ * 打开移动端菜单并展开指定子菜单
+ */
+const openMobileMenuWithSubmenu = (path: string[]) => {
+  isMobileMenuOpen.value = true;
+  activeMenuPath.value = path;
 };
 
 // 🚀 组件挂载
@@ -211,7 +243,14 @@ onMounted(() => {
 
   // 监听窗口大小变化，更新移动端状态
   window.addEventListener('resize', () => {
+    const wasMobile = isMobile.value;
     isMobile.value = checkIsMobile();
+
+    if (isMobile.value) {
+      isScrolled.value = false;
+    } else if (wasMobile) {
+      checkInitialScroll();
+    }
   });
 
   // 强制检查初始滚动状态
@@ -222,6 +261,9 @@ onMounted(() => {
 
   // 🖱️ 监听全局点击事件，点击菜单区域外关闭子菜单
   document.addEventListener('click', handleClickOutside);
+
+  // ⌨️ 监听 ESC 键关闭移动端菜单
+  document.addEventListener('keydown', handleEscKey);
 
   // 延迟再次检查，确保 DOM 完全渲染
   setTimeout(checkInitialScroll, 100);
@@ -240,6 +282,8 @@ onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll);
   // 🖱️ 移除全局点击事件监听
   document.removeEventListener('click', handleClickOutside);
+  // ⌨️ 移除 ESC 键监听
+  document.removeEventListener('keydown', handleEscKey);
   // 清除导航栏淡出计时器
   if (navbarFadeTimer) {
     clearTimeout(navbarFadeTimer);
@@ -247,6 +291,10 @@ onUnmounted(() => {
   // 清除导航栏隐藏计时器
   if (navbarHideTimer) {
     clearTimeout(navbarHideTimer);
+  }
+  // 恢复页面滚动
+  if (typeof document !== 'undefined') {
+    document.body.style.overflow = '';
   }
 });
 </script>
@@ -271,21 +319,36 @@ onUnmounted(() => {
     <nav
       class="navbar"
       :class="{
-        'is-scrolled': isScrolled,
-        'is-transparent': !isScrolled,
+        'is-scrolled': isScrolled && !isMobile,
+        'is-transparent': !isScrolled && !isMobile,
         'is-faded': isNavbarFaded,
         'is-hidden': isNavbarHidden
       }"
     >
+      <!-- 📱 移动端底座背景（含中间凸起） -->
+      <div class="navbar-dock-bg" aria-hidden="true">
+        <svg
+          class="navbar-dock-bg-svg"
+          viewBox="0 0 390 92"
+          preserveAspectRatio="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            class="navbar-dock-bg-path"
+            d="M0,42 V92 H390 V42 Q390,34 382,34 H255 C238,34 230,2 195,2 C160,2 152,34 135,34 H8 Q0,34 0,42 Z"
+          />
+        </svg>
+      </div>
       <div class="navbar-container">
       <!-- 🏠 Logo 区域 -->
       <div class="navbar-brand-wrapper">
-        <a href="/" class="navbar-brand" @click="closeMobileMenu">
+        <a href="/" class="navbar-brand" @click="closeMobileMenu" :aria-label="navbarConfig.logo.siteName">
           <img
             v-if="navbarConfig.logo.showLogo"
             :src="navbarConfig.logo.src"
             :alt="navbarConfig.logo.siteName"
             class="navbar-logo"
+            decoding="sync"
           />
           <span v-if="navbarConfig.logo.showSiteName" class="navbar-site-name">
             {{ navbarConfig.logo.siteName }}
@@ -389,6 +452,32 @@ onUnmounted(() => {
         </div>
       </div>
 
+      <!-- 📱 移动端底部菜单触发按钮 -->
+      <div class="navbar-mobile-dock-menu">
+        <button
+          class="navbar-dock-menu-trigger"
+          :class="{ 'is-active': isMobileMenuOpen }"
+          @click="toggleMobileMenu"
+          :aria-label="navbarConfig.mobileMenu.ariaLabel"
+        >
+          <svg
+            class="dock-menu-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="3" y="3" width="7" height="7" rx="1.5" />
+            <rect x="14" y="3" width="7" height="7" rx="1.5" />
+            <rect x="14" y="14" width="7" height="7" rx="1.5" />
+            <rect x="3" y="14" width="7" height="7" rx="1.5" />
+          </svg>
+          <span class="dock-menu-label">导航</span>
+        </button>
+      </div>
+
       <!-- 📱 移动端菜单按钮 -->
       <button
         class="navbar-toggle"
@@ -404,48 +493,95 @@ onUnmounted(() => {
   </nav>
 </div>
 
-<!-- 📱 移动端菜单（支持多级菜单） -->
+<!-- 📱 移动端菜单遮罩与弹窗 -->
+<div
+  class="navbar-mobile-menu-overlay"
+  :class="{ 'is-open': isMobileMenuOpen }"
+  @click="closeMobileMenu"
+></div>
 <div
   class="navbar-mobile-menu"
   :class="{ 'is-open': isMobileMenuOpen }"
 >
+  <div class="mobile-menu-header">
+    <span class="mobile-menu-title">导航</span>
+    <button
+      class="mobile-menu-close"
+      @click="closeMobileMenu"
+      aria-label="关闭菜单"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M18 6L6 18M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+  <div class="mobile-menu-cards">
     <template v-for="(link, index) in navbarConfig.links" :key="`mobile-${index}`">
       <!-- 🔗 有子菜单的项 -->
       <div
         v-if="link.children && link.children.length > 0"
-        class="navbar-mobile-menu-item has-submenu"
+        class="mobile-menu-card has-submenu"
         :class="{ 'is-active': isMenuActive([link.text]) }"
       >
         <span
-          class="navbar-mobile-link submenu-toggle"
+          class="mobile-menu-card-header submenu-toggle"
           @click="toggleSubmenu([link.text], $event)"
         >
           {{ link.text }}
-          <span class="submenu-arrow" :class="{ 'is-rotated': isMenuActive([link.text]) }">▶️</span>
+          <svg
+            class="submenu-arrow"
+            :class="{ 'is-rotated': isMenuActive([link.text]) }"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M9 18l6-6-6-6" />
+          </svg>
         </span>
         <!-- 📂 二级菜单 -->
-        <div v-show="isMenuActive([link.text])" class="mobile-submenu level-1">
+        <div v-show="isMenuActive([link.text])" class="mobile-menu-card-body">
           <template v-for="(child, childIndex) in link.children" :key="`mobile-${index}-${childIndex}`">
             <!-- 🔗 有三级菜单的项 -->
             <div
               v-if="child.children && child.children.length > 0"
-              class="mobile-submenu-item has-submenu"
+              class="mobile-menu-group has-submenu"
               :class="{ 'is-active': isMenuActive([link.text, child.text]) }"
             >
               <span
-                class="mobile-submenu-link submenu-toggle"
+                class="mobile-menu-group-title submenu-toggle"
                 @click="toggleSubmenu([link.text, child.text], $event)"
               >
                 {{ child.text }}
-                <span class="submenu-arrow" :class="{ 'is-rotated': isMenuActive([link.text, child.text]) }">▶️</span>
+                <svg
+                  class="submenu-arrow"
+                  :class="{ 'is-rotated': isMenuActive([link.text, child.text]) }"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
               </span>
               <!-- 📂 三级菜单 -->
-              <div v-show="isMenuActive([link.text, child.text])" class="mobile-submenu level-2">
+              <div v-show="isMenuActive([link.text, child.text])" class="mobile-menu-list level-2">
                 <a
                   v-for="(grandChild, grandChildIndex) in child.children"
                   :key="`mobile-${index}-${childIndex}-${grandChildIndex}`"
                   :href="grandChild.href"
-                  class="mobile-submenu-link"
+                  class="mobile-menu-link"
                   :target="grandChild.external ? '_blank' : undefined"
                   :rel="grandChild.external ? 'noopener noreferrer' : undefined"
                   @click="closeMobileMenu"
@@ -458,7 +594,7 @@ onUnmounted(() => {
             <a
               v-else
               :href="child.href"
-              class="mobile-submenu-link"
+              class="mobile-menu-link"
               :target="child.external ? '_blank' : undefined"
               :rel="child.external ? 'noopener noreferrer' : undefined"
               @click="closeMobileMenu"
@@ -472,15 +608,18 @@ onUnmounted(() => {
       <a
         v-else
         :href="link.href"
-        class="navbar-mobile-link"
+        class="mobile-menu-card mobile-menu-card-link"
         :target="link.external ? '_blank' : undefined"
         :rel="link.external ? 'noopener noreferrer' : undefined"
         @click="closeMobileMenu"
       >
-        {{ link.text }}
+        <span class="mobile-menu-card-header">
+          {{ link.text }}
+        </span>
       </a>
     </template>
   </div>
+</div>
 </template>
 
 <style lang="scss">

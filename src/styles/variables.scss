@@ -102,6 +102,10 @@
   --navbar-scrolled-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   --navbar-dark-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 
+  // 📱 移动端底座导航栏
+  --mobile-bottom-nav-bg: rgba(255, 255, 255, 0.92);
+  --mobile-bottom-nav-border: rgba(0, 0, 0, 0.06);
+
   // 🌸 导航栏文本白色 + 粉色发光阴影
   --navbar-glow-text: #ffffff;
   --navbar-glow-shadow: 0 0 8px rgba(236, 72, 153, 0.6),
@@ -257,8 +261,8 @@
   --navbar-scrolled-bg-start: rgba(255, 255, 255, 0.18);
   --navbar-scrolled-bg-end: rgba(255, 255, 255, 0.08);
 
-  // 🛰️ 导航栏其他颜色 - 暗色模式
-  --navbar-mobile-menu-shadow-dark: 0 10px 40px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3);
+  --mobile-bottom-nav-bg: rgba(30, 41, 59, 0.95);
+  --mobile-bottom-nav-border: rgba(255, 255, 255, 0.08);
 
   // 🏷️ 提示气泡颜色 - 暗色模式
   --tooltip-bg: #ffffff;
@@ -318,6 +322,11 @@
 // ========================================
 :root {
   --nav-height: 80px;
+  --mobile-bottom-nav-height: 36px;
+  --mobile-bottom-nav-bump-width: 96px;
+  --mobile-bottom-nav-bump-height: 36px;
+  --mobile-bottom-nav-logo-size: 46px;
+  --mobile-bottom-nav-logo-offset: 16px;
   --max-content-width: 1440px;
   --nav-z-index: 3;
   --banner-z-index: 4;

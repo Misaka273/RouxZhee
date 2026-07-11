@@ -49,7 +49,12 @@ import ThemeToggle from './ThemeToggle.vue';
    ======================================== */
 @media (max-width: 768px) {
   .rouxzhee-floating-toolbar {
-    bottom: 1.5rem;
+    bottom: calc(
+      var(--mobile-bottom-nav-height) +
+      var(--mobile-bottom-nav-bump-height) +
+      env(safe-area-inset-bottom) +
+      1rem
+    );
     right: 1rem;
     gap: 0.5rem;
   }
@@ -57,7 +62,12 @@ import ThemeToggle from './ThemeToggle.vue';
 
 @media (max-width: 480px) {
   .rouxzhee-floating-toolbar {
-    bottom: 1rem;
+    bottom: calc(
+      var(--mobile-bottom-nav-height) +
+      var(--mobile-bottom-nav-bump-height) +
+      env(safe-area-inset-bottom) +
+      0.75rem
+    );
     right: 0.75rem;
     gap: 0.5rem;
   }

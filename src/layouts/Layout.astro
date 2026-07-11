@@ -8,6 +8,7 @@ import Footer from '../components/Footer.vue';
 import SearchModal from '../components/SearchModal.vue';
 import SeoHead from '../components/seo/SeoHead.astro';
 import { seoConfig } from '../config/seo.config';
+import { navbarConfig } from '../config/navbar.config';
 import { resolvePageSeo } from '../utils/seo';
 import { getSiteUrl } from '../utils/site';
 import type { SeoPageInput } from '../types/seo';
@@ -39,6 +40,23 @@ const seo = resolvePageSeo(
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- 🌗 尽早应用用户保存的主题，避免暗色模式下首屏闪烁 -->
+    <script is:inline>
+      (function () {
+        try {
+          const saved = localStorage.getItem('rouxzhee-theme-preference');
+          if (saved === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+          }
+        } catch (e) {
+          // 忽略无痕模式等 localStorage 不可用的情况
+        }
+      })();
+    </script>
+
+    <!-- 🏠 预加载导航栏 LOGO，避免首屏加载时 LOGO 延迟出现 -->
+    <link rel="preload" as="image" href={navbarConfig.logo.src} type="image/svg+xml" />
 
     <!-- 🔍 SEO 组件 -->
     <SeoHead seo={seo} />
@@ -167,6 +185,21 @@ const seo = resolvePageSeo(
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  // 📱 移动端底部导航适配：移除顶部导航高度、预留底部安全区域
+  @media (max-width: 768px) {
+    :root {
+      --nav-height: 0px;
+    }
+
+    body {
+      padding-bottom: calc(
+        var(--mobile-bottom-nav-height) +
+        var(--mobile-bottom-nav-bump-height) +
+        env(safe-area-inset-bottom)
+      );
+    }
   }
 
   /* 🌊 View Transition API 样式 */
