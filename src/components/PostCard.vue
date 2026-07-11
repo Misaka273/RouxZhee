@@ -152,7 +152,7 @@ const handleImageError = (event: Event) => {
   display: flex;
   flex-direction: column;
   position: relative;
-  background: var(--glass-bg);
+  background: var(--glass-bg-doc);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
@@ -372,7 +372,7 @@ const handleImageError = (event: Event) => {
 /* 🌙 暗色模式适配 */
 :global(.dark-mode) {
   .post-card {
-    background: var(--glass-bg);
+    background: var(--glass-bg-doc);
     border-color: var(--glass-border);
 
     .post-content {

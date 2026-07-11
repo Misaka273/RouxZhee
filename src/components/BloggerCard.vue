@@ -18,9 +18,9 @@
         @load="handleBgLoad"
         @error="handleBgError"
       />
+      <!-- 🌫️ 背景遮罩层 -->
+      <div class="blogger-card-overlay"></div>
     </div>
-    <!-- 🌫️ 背景遮罩层 -->
-    <div v-if="bannerBgImage && !bgError" class="blogger-card-overlay"></div>
 
     <!-- 🖼️ 头像区域 -->
     <div class="blogger-avatar-wrapper">
@@ -144,6 +144,7 @@ const hasBeian = computed(() => {
   border: 1px solid var(--glass-border);
   border-radius: var(--card-border-radius);
   box-shadow: var(--card-shadow);
+  overflow: hidden;
   transition: transform var(--transition-normal), box-shadow var(--transition-normal);
   transform: translateZ(0);
   will-change: transform, box-shadow;
@@ -165,34 +166,28 @@ const hasBeian = computed(() => {
   .blogger-card-bg-wrapper {
     position: absolute;
     inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     overflow: hidden;
-    border-radius: var(--card-border-radius);
     z-index: 0;
 
     .blogger-card-bg {
-      height: 100%;
-      width: auto;
-      max-width: none;
-      object-fit: contain;
+      width: calc(100% + 2 * var(--blogger-card-overlay-blur));
+      height: calc(100% + 2 * var(--blogger-card-overlay-blur));
+      margin: calc(-1 * var(--blogger-card-overlay-blur));
+      object-fit: cover;
+      filter: blur(var(--blogger-card-overlay-blur));
+    }
+
+    /* 🌫️ 背景遮罩层（纯色叠加，避免 backdrop-filter 圆角漏光） */
+    .blogger-card-overlay {
+      position: absolute;
+      inset: 0;
+      background: var(--blogger-card-overlay-bg);
+      z-index: 1;
     }
   }
 
-  /* 🌫️ 背景遮罩层 */
-  .blogger-card-overlay {
-    position: absolute;
-    inset: 0;
-    background: var(--blogger-card-overlay-bg);
-    backdrop-filter: blur(var(--blogger-card-overlay-blur));
-    -webkit-backdrop-filter: blur(var(--blogger-card-overlay-blur));
-    border-radius: var(--card-border-radius);
-    z-index: 0;
-  }
-
   /* 📦 确保内容在遮罩层之上 */
-  > *:not(.blogger-card-overlay):not(.blogger-card-bg-wrapper) {
+  > *:not(.blogger-card-bg-wrapper) {
     position: relative;
     z-index: 1;
   }
