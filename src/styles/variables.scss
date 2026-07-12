@@ -333,6 +333,12 @@
   --content-z-index: 1;
   --theme-transition-z-index: 2;
 
+  // 🦶 页脚抽屉
+  --footer-drawer-z-index: 1000;
+  --footer-drawer-overlay-z-index: 1001;
+  --footer-drawer-content-z-index: 1002;
+  --footer-drawer-backdrop-blur: 16px;
+
   // ✨ 光标拖尾特效
   --cursor-trail-z-index: 9999;
   --cursor-trail-star-color: rgb(4, 0, 255);

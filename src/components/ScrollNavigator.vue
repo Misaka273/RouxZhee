@@ -234,6 +234,7 @@ onUnmounted(() => {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
+  font-family: 'xnyt', var(--font-body);
 
   &:hover {
     transform: translateY(-2px) scale(1.05);
@@ -281,6 +282,7 @@ onUnmounted(() => {
   padding: 0.5rem 0.875rem;
   background: var(--tooltip-bg);
   color: var(--tooltip-text);
+  font-family: 'xnyt', var(--font-body);
   font-size: 0.8rem;
   font-weight: 500;
   border-radius: 8px;
@@ -324,6 +326,7 @@ onUnmounted(() => {
   flex-shrink: 0;
   z-index: 10;
   -webkit-tap-highlight-color: transparent;
+  font-family: 'xnyt', var(--font-body);
   /* 确保火箭可以超出容器 */
   overflow: visible;
 
@@ -458,6 +461,7 @@ onUnmounted(() => {
   padding: 0.5rem 0.875rem;
   background: var(--tooltip-bg);
   color: var(--tooltip-text);
+  font-family: 'xnyt', var(--font-body);
   font-size: 0.8rem;
   font-weight: 500;
   border-radius: 12px;

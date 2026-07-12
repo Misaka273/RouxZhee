@@ -9,6 +9,7 @@
 import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue';
 import Clock from './Clock.vue';
 import { navbarConfig, type NavLink } from '../config/navbar.config';
+import { useFooterDrawer } from '../composables/useFooterDrawer';
 import type { TocItem, CategoryDoc, CategoryItem } from '../types/doc';
 
 // 💕 组件属性定义（文档页侧边栏数据）
@@ -129,6 +130,9 @@ const checkIsMobile = () => {
   if (typeof window === 'undefined') return false;
   return window.innerWidth <= 768;
 };
+
+// 🦶 页脚抽屉共享状态
+const { isOpen: isFooterDrawerOpen, close: closeFooterDrawer, toggle: toggleFooterDrawer } = useFooterDrawer();
 
 // 🎨 导航栏透明度控制（普通页面效果）
 const isNavbarFaded = ref(false);
@@ -251,13 +255,19 @@ const checkInitialScroll = () => {
  */
 const openPanel = (panel: NonNullable<MobilePanel>) => {
   activePanel.value = panel;
+  closeFooterDrawer();
 };
 
 /**
  * 切换指定移动端面板
  */
 const togglePanel = (panel: NonNullable<MobilePanel>) => {
-  activePanel.value = activePanel.value === panel ? null : panel;
+  if (activePanel.value === panel) {
+    activePanel.value = null;
+  } else {
+    activePanel.value = panel;
+    closeFooterDrawer();
+  }
 };
 
 /**
@@ -295,6 +305,13 @@ const handleEscKey = (event: KeyboardEvent) => {
 watch(activePanel, (panel) => {
   if (typeof document === 'undefined') return;
   document.body.style.overflow = panel ? 'hidden' : '';
+});
+
+// 🦶 页脚抽屉打开时关闭移动端面板
+watch(isFooterDrawerOpen, (open) => {
+  if (open) {
+    closePanel();
+  }
 });
 
 // 📱 切换到移动端时，强制取消导航栏隐藏状态
@@ -636,6 +653,29 @@ onUnmounted(() => {
               <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
             </svg>
             <span class="dock-menu-label">分类</span>
+          </button>
+
+          <!-- 🦶 页脚抽屉按钮 -->
+          <button
+            class="navbar-dock-menu-trigger"
+            :class="{ 'is-active': isFooterDrawerOpen }"
+            @click="toggleFooterDrawer"
+            aria-label="关于站点"
+          >
+            <svg
+              class="dock-menu-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 16v-4" />
+              <path d="M12 8h.01" />
+            </svg>
+            <span class="dock-menu-label">关于</span>
           </button>
         </div>
       </div>

@@ -26,7 +26,7 @@ onMounted(start);
 
 <style scoped lang="scss">
 .rouxzhee-runtime {
-  font-family: var(--rouxzhee-font-family-mono, 'Monaco', 'Menlo', 'Consolas', monospace);
+  font-family: 'xnyt', var(--font-body);
   font-size: 0.875rem;
   color: var(--text-secondary);
   white-space: nowrap;
