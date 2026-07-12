@@ -675,7 +675,7 @@ onUnmounted(() => {
               <path d="M12 16v-4" />
               <path d="M12 8h.01" />
             </svg>
-            <span class="dock-menu-label">关于</span>
+            <span class="dock-menu-label">站点</span>
           </button>
         </div>
       </div>
