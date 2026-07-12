@@ -11,6 +11,12 @@
       <!-- 👤 博主信息卡片 -->
       <BloggerCard />
 
+      <!-- 🎲 随机文档推荐 -->
+      <RandomPostsCard
+        v-if="bloggerConfig.cloud.random.enabled"
+        :posts="allPosts"
+      />
+
       <!-- ☁️ 文档分类云 -->
       <CloudCard
         :title="bloggerConfig.cloud.category.title"
@@ -71,6 +77,7 @@ import { ref, onMounted, computed } from 'vue';
 import PostCard from './PostCard.vue';
 import BloggerCard from './BloggerCard.vue';
 import CloudCard from './CloudCard.vue';
+import RandomPostsCard from './RandomPostsCard.vue';
 import { bloggerConfig } from '../config/blogger.config';
 import type { Post } from '../types/post';
 import type { CloudItem } from '../config/blogger.config';

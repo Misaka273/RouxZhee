@@ -127,6 +127,14 @@ export const defaultBloggerConfig = {
       // 默认空数组，可由外部动态传入或用户手动覆盖
       items: [] as CloudItem[],
     },
+    // 🎲 随机文档推荐
+    random: {
+      enabled: true,
+      title: '随机文档',
+      icon: '🎲',
+      count: 3,
+      interval: 5000,
+    },
   },
 } as const;
 
