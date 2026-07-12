@@ -3,12 +3,20 @@
 // 😎余温 原创开发 🔗https://wiki.xxdevops.cn
 // 首页入口 - 博客主页
 
+import { resolve } from 'path';
 import Layout from '../layouts/Layout.astro';
 import Banner from '../components/Banner.vue';
 import HomeContent from '../components/HomeContent.vue';
 import { bannerConfig } from '../config/banner.config';
 import { createPageSeo } from '../utils/seo';
 import { seoConfig } from '../config/seo.config';
+import { getSiteOverviewDocData } from '../utils/siteOverview';
+
+// 📁 文档目录
+const docDir = resolve(process.cwd(), 'doc');
+
+// ☁️ 从 doc 目录读取文档分类云、标签云（与站点概览页一致）
+const docData = getSiteOverviewDocData(docDir);
 
 const seo = createPageSeo({
   title: `${bannerConfig.title} - 首页`,
@@ -26,7 +34,7 @@ const seo = createPageSeo({
     <!-- 📄 内容区域 -->
     <div class="home-content-section" id="content">
       <!-- 🏠 双栏内容布局 -->
-      <HomeContent client:load="vue" />
+      <HomeContent client:load="vue" categories={docData.categories} tags={docData.tags} />
     </div>
   </div>
 </Layout>

@@ -87,6 +87,7 @@
         {{ config.beian.gongan.text }}
       </a>
     </div>
+
   </div>
 </template>
 
@@ -317,6 +318,7 @@ const hasBeian = computed(() => {
       }
     }
   }
+
 }
 
 /* 🌙 暗色模式适配 */

@@ -11,6 +11,28 @@
       <!-- 👤 博主信息卡片 -->
       <BloggerCard />
 
+      <!-- ☁️ 文档分类云 -->
+      <CloudCard
+        :title="bloggerConfig.cloud.category.title"
+        :icon="bloggerConfig.cloud.category.icon"
+        item-label="分类"
+        :items="categories"
+        :max-count="bloggerConfig.cloud.category.maxCount"
+        :min-size="bloggerConfig.cloud.category.minSize"
+        :max-size="bloggerConfig.cloud.category.maxSize"
+      />
+
+      <!-- ☁️ 文档标签云 -->
+      <CloudCard
+        :title="bloggerConfig.cloud.tag.title"
+        :icon="bloggerConfig.cloud.tag.icon"
+        item-label="标签"
+        :items="tags"
+        :max-count="bloggerConfig.cloud.tag.maxCount"
+        :min-size="bloggerConfig.cloud.tag.minSize"
+        :max-size="bloggerConfig.cloud.tag.maxSize"
+      />
+
       <!-- 📊 其他信息卡片（预留扩展） -->
       <!-- <div class="sidebar-card">其他内容...</div> -->
     </aside>
@@ -48,8 +70,21 @@
 import { ref, onMounted, computed } from 'vue';
 import PostCard from './PostCard.vue';
 import BloggerCard from './BloggerCard.vue';
+import CloudCard from './CloudCard.vue';
+import { bloggerConfig } from '../config/blogger.config';
 import type { Post } from '../types/post';
+import type { CloudItem } from '../config/blogger.config';
 import { PerformanceMonitor } from '../utils/performance';
+
+/* ☁️ 侧边栏云标签数据（由 Astro 页面构建时传入） */
+const props = defineProps<{
+  categories?: CloudItem[];
+  tags?: CloudItem[];
+}>();
+
+/* ☁️ 云标签数据透传 */
+const categories = computed<CloudItem[]>(() => props.categories ?? []);
+const tags = computed<CloudItem[]>(() => props.tags ?? []);
 
 /* 📝 文档列表数据 */
 const posts = ref<Post[]>([]);

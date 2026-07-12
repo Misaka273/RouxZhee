@@ -17,6 +17,34 @@ export interface BloggerSocialLink {
 }
 
 // ========================================
+// 📋 云标签数据类型
+// ========================================
+export interface CloudItem {
+  // 分类/标签名称
+  name: string;
+  // 出现次数
+  count: number;
+}
+
+// ========================================
+// 📋 云标签配置类型
+// ========================================
+export interface BloggerCloudConfig {
+  // 是否显示云标签
+  enabled: boolean;
+  // 标题
+  title: string;
+  // 图标
+  icon: string;
+  // 最大展示数量
+  maxCount: number;
+  // 最小字体大小（px）
+  minSize: number;
+  // 最大字体大小（px）
+  maxSize: number;
+}
+
+// ========================================
 // 📋 默认配置
 // ========================================
 export const defaultBloggerConfig = {
@@ -72,6 +100,32 @@ export const defaultBloggerConfig = {
       text: '*公网安备*********号',
       // 公安备案号链接
       href: 'https://www.beian.gov.cn/',
+    },
+  },
+
+  // ☁️ 侧边栏云标签配置
+  cloud: {
+    // 🏷️ 文档分类云
+    category: {
+      enabled: true,
+      title: '文档分类',
+      icon: '🏷️',
+      maxCount: 20,
+      minSize: 12,
+      maxSize: 24,
+      // 默认空数组，可由外部动态传入或用户手动覆盖
+      items: [] as CloudItem[],
+    },
+    // 🔖 文档标签云
+    tag: {
+      enabled: true,
+      title: '文档标签',
+      icon: '🔖',
+      maxCount: 20,
+      minSize: 12,
+      maxSize: 22,
+      // 默认空数组，可由外部动态传入或用户手动覆盖
+      items: [] as CloudItem[],
     },
   },
 } as const;
