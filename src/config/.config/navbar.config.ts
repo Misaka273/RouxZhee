@@ -41,7 +41,13 @@ export const userNavbarConfig: Partial<NavbarConfig> = {
     },
     { text: '标签', href: '/tags' },
     { text: '归档', href: '/archives' },
-    { text: '关于', href: '/about' },
+    {
+      text: '关于',
+      children: [
+        { text: '👤 个人介绍', href: '/about' },
+        { text: '🏠 站点概览', href: '/site' },
+      ],
+    },
     { text: '友链', href: 'https://gl.baimu.live', external: true },
   ] as NavLink[],
 

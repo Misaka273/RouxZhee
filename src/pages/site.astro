@@ -1,0 +1,72 @@
+---
+// 🕊️白木 原创开发 🔗gl.baimu.live
+// 🏠 站点概览页面入口
+
+import { resolve } from 'path';
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.vue';
+import SiteOverviewPage from '../components/SiteOverviewPage.vue';
+import { createPageSeo } from '../utils/seo';
+import { siteOverviewConfig } from '../config/site.config';
+import { bloggerConfig } from '../config/blogger.config';
+import { aboutConfig } from '../config/about.config';
+import { seoConfig } from '../config/seo.config';
+import { runtimeConfig } from '../config/runtime.config';
+import { getSiteOverviewDocData } from '../utils/siteOverview';
+
+// 📁 文档目录
+const docDir = resolve(process.cwd(), 'doc');
+
+// 📊 从 doc 目录读取文档统计、分类云、标签云
+const docData = getSiteOverviewDocData(docDir);
+
+// 📅 站点启动时间（创建时间）
+const createdAt = new Date(runtimeConfig.initDate).toISOString().split('T')[0];
+
+// 🔗 公安备案信息
+const gonganText = bloggerConfig.beian.gongan.text;
+const gonganHref = bloggerConfig.beian.gongan.href;
+
+// 📋 动态数据（覆盖 site.config.ts 中的默认值）
+const dynamicData = {
+  site: {
+    name: seoConfig.siteName,
+    description: seoConfig.defaultDescription,
+    icon: siteOverviewConfig.site.icon,
+    createdAt,
+    status: siteOverviewConfig.site.status,
+  },
+  owner: {
+    name: aboutConfig.hero.name,
+    contact: aboutConfig.footer.email,
+  },
+  icp: {
+    number: bloggerConfig.beian.icp.text,
+    href: bloggerConfig.beian.icp.href,
+    entity: aboutConfig.hero.name,
+    status: 'registered' as const,
+  },
+  gongan: {
+    text: gonganText,
+    href: gonganHref,
+  },
+  documents: docData.documents,
+  categories: docData.categories,
+  tags: docData.tags,
+  theme: siteOverviewConfig.theme,
+};
+
+const seo = createPageSeo({
+  title: `站点概览 - ${seoConfig.siteName}`,
+  description: seoConfig.defaultDescription,
+  type: 'website',
+});
+---
+
+<Layout seo={seo}>
+  <!-- 🧭 独立导航栏（Site 页面没有 Banner） -->
+  <Navbar client:load="vue" />
+
+  <!-- 🏠 站点概览内容 -->
+  <SiteOverviewPage client:load="vue" data={dynamicData} />
+</Layout>
