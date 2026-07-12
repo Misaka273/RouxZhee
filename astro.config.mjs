@@ -2,6 +2,29 @@
 // Astro 核心配置 - 性能优化
 import { defineConfig } from 'astro/config';
 import vue from '@astrojs/vue';
+import { visit } from 'unist-util-visit';
+
+/**
+ * 🧹 去除 Markdown 中的 HTML 注释节点及其产生的空段落
+ * 避免注释被渲染成含 <br> 的空白段落，造成移动端文档内容顶部出现大段空白
+ */
+function remarkStripHtmlComments() {
+  return (tree) => {
+    visit(tree, 'paragraph', (node, index, parent) => {
+      if (!parent || typeof index !== 'number') return;
+      const onlyWhitespaceCommentsOrBreaks = node.children.every((child) => {
+        if (child.type === 'text') return /^\s*$/.test(child.value);
+        if (child.type === 'html') return /^\s*<!--[\s\S]*?-->\s*$/.test(child.value);
+        if (child.type === 'break') return true;
+        return false;
+      });
+      if (onlyWhitespaceCommentsOrBreaks) {
+        parent.children.splice(index, 1);
+        return index;
+      }
+    });
+  };
+}
 
 // https://astro.build/config
 export default defineConfig({
@@ -109,5 +132,10 @@ export default defineConfig({
     routing: {
       prefixDefaultLocale: false,
     },
+  },
+
+  // 📝 Markdown 处理配置
+  markdown: {
+    remarkPlugins: [remarkStripHtmlComments],
   },
 });

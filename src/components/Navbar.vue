@@ -6,9 +6,40 @@
 -->
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
+import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue';
 import Clock from './Clock.vue';
 import { navbarConfig, type NavLink } from '../config/navbar.config';
+import type { TocItem, CategoryDoc, CategoryItem } from '../types/doc';
+
+// 💕 组件属性定义（文档页侧边栏数据）
+interface Props {
+  toc?: TocItem[];
+  showToc?: boolean;
+  categoryDocs?: CategoryDoc[];
+  categoryName?: string;
+  categoryFullPath?: string;
+  categoryTree?: CategoryItem[];
+  isRootDoc?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  toc: () => [],
+  showToc: true,
+  categoryDocs: () => [],
+  categoryName: '',
+  categoryFullPath: '',
+  categoryTree: () => [],
+  isRootDoc: false
+});
+
+// 📊 计算属性：是否在移动端底座显示文档相关按钮
+const hasToc = computed(() => props.showToc && props.toc.length > 0);
+const hasCategory = computed(() =>
+  props.isRootDoc ? props.categoryTree.length > 0 : props.categoryDocs.length > 0
+);
+const categoryPanelTitle = computed(() =>
+  props.isRootDoc ? '📂文档分类' : `📂${props.categoryName || '文档列表'}`
+);
 
 // 🎯 当前打开的菜单路径（用于控制多级菜单展开状态）
 const activeMenuPath = ref<string[]>([]);
@@ -63,9 +94,26 @@ const handleClickOutside = (event: MouseEvent) => {
   }
 };
 
+// 📝 移动端分类树展开状态
+const expandedCategories = ref<Set<string>>(new Set());
+
+// 🔗 切换分类展开/收起
+const toggleCategory = (path: string) => {
+  const next = new Set(expandedCategories.value);
+  if (next.has(path)) {
+    next.delete(path);
+  } else {
+    next.add(path);
+  }
+  expandedCategories.value = next;
+};
+
 // 🎯 响应式状态
 const isScrolled = ref(false);
-const isMobileMenuOpen = ref(false);
+
+type MobilePanel = 'nav' | 'toc' | 'category' | null;
+const activePanel = ref<MobilePanel>(null);
+const isMobileMenuOpen = computed(() => activePanel.value !== null);
 
 // 📄 检测是否在文档内容页面
 const isDocPage = computed(() => {
@@ -199,41 +247,90 @@ const checkInitialScroll = () => {
 };
 
 /**
- * 切换移动端菜单
+ * 打开指定移动端面板
  */
-const toggleMobileMenu = () => {
-  isMobileMenuOpen.value = !isMobileMenuOpen.value;
+const openPanel = (panel: NonNullable<MobilePanel>) => {
+  activePanel.value = panel;
 };
 
 /**
- * 关闭移动端菜单
+ * 切换指定移动端面板
  */
-const closeMobileMenu = () => {
-  isMobileMenuOpen.value = false;
+const togglePanel = (panel: NonNullable<MobilePanel>) => {
+  activePanel.value = activePanel.value === panel ? null : panel;
+};
+
+/**
+ * 关闭移动端面板
+ */
+const closePanel = () => {
+  activePanel.value = null;
   closeAllSubmenus();
 };
 
 /**
- * 按 ESC 关闭移动端菜单
+ * 切换移动端菜单（兼容旧接口）
+ */
+const toggleMobileMenu = () => {
+  togglePanel('nav');
+};
+
+/**
+ * 关闭移动端菜单（兼容旧接口）
+ */
+const closeMobileMenu = () => {
+  closePanel();
+};
+
+/**
+ * 按 ESC 关闭移动端面板
  */
 const handleEscKey = (event: KeyboardEvent) => {
-  if (event.key === 'Escape' && isMobileMenuOpen.value) {
-    closeMobileMenu();
+  if (event.key === 'Escape' && activePanel.value) {
+    closePanel();
   }
 };
 
-// 📱 打开移动端菜单时禁止页面滚动
-watch(isMobileMenuOpen, (isOpen) => {
+// 📱 打开移动端面板时禁止页面滚动
+watch(activePanel, (panel) => {
   if (typeof document === 'undefined') return;
-  document.body.style.overflow = isOpen ? 'hidden' : '';
+  document.body.style.overflow = panel ? 'hidden' : '';
+});
+
+// 📱 切换到移动端时，强制取消导航栏隐藏状态
+watch(isMobile, (mobile) => {
+  if (mobile) {
+    isNavbarHidden.value = false;
+    if (navbarHideTimer) {
+      clearTimeout(navbarHideTimer);
+      navbarHideTimer = null;
+    }
+  }
 });
 
 /**
- * 打开移动端菜单并展开指定子菜单
+ * 打开移动端菜单并展开指定子菜单（兼容旧接口）
  */
 const openMobileMenuWithSubmenu = (path: string[]) => {
-  isMobileMenuOpen.value = true;
+  activePanel.value = 'nav';
   activeMenuPath.value = path;
+};
+
+// 🔗 移动端目录锚点平滑滚动
+const scrollToTocAnchor = (id: string) => {
+  closePanel();
+  nextTick(() => {
+    const element = document.getElementById(id);
+    if (!element) return;
+
+    const offset = 16;
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop || 0;
+    const targetPosition = element.getBoundingClientRect().top + scrollTop - offset;
+    window.scrollTo({
+      top: targetPosition,
+      behavior: 'smooth'
+    });
+  });
 };
 
 // 🚀 组件挂载
@@ -247,7 +344,13 @@ onMounted(() => {
     isMobile.value = checkIsMobile();
 
     if (isMobile.value) {
+      // 📱 切换到移动端时，确保导航栏不会隐藏
       isScrolled.value = false;
+      isNavbarHidden.value = false;
+      if (navbarHideTimer) {
+        clearTimeout(navbarHideTimer);
+        navbarHideTimer = null;
+      }
     } else if (wasMobile) {
       checkInitialScroll();
     }
@@ -267,6 +370,15 @@ onMounted(() => {
 
   // 延迟再次检查，确保 DOM 完全渲染
   setTimeout(checkInitialScroll, 100);
+
+  // 📂 初始化分类展开状态（与 DocContent 保持一致）
+  if (props.categoryTree.length > 0) {
+    props.categoryTree.forEach(category => {
+      if (category.isExpanded) {
+        expandedCategories.value.add(category.path);
+      }
+    });
+  }
 
   // ⏱️ 启动导航栏效果计时器（页面加载3秒后开始）
   // 文档页面使用上移渐隐，普通页面使用透明度淡出
@@ -454,28 +566,78 @@ onUnmounted(() => {
 
       <!-- 📱 移动端底部菜单触发按钮 -->
       <div class="navbar-mobile-dock-menu">
-        <button
-          class="navbar-dock-menu-trigger"
-          :class="{ 'is-active': isMobileMenuOpen }"
-          @click="toggleMobileMenu"
-          :aria-label="navbarConfig.mobileMenu.ariaLabel"
-        >
-          <svg
-            class="dock-menu-icon"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+        <div class="navbar-dock-left">
+          <!-- 📑 目录按钮 -->
+          <button
+            v-if="hasToc"
+            class="navbar-dock-menu-trigger"
+            :class="{ 'is-active': activePanel === 'toc' }"
+            @click="togglePanel('toc')"
+            aria-label="文档目录"
           >
-            <rect x="3" y="3" width="7" height="7" rx="1.5" />
-            <rect x="14" y="3" width="7" height="7" rx="1.5" />
-            <rect x="14" y="14" width="7" height="7" rx="1.5" />
-            <rect x="3" y="14" width="7" height="7" rx="1.5" />
-          </svg>
-          <span class="dock-menu-label">导航</span>
-        </button>
+            <svg
+              class="dock-menu-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+            </svg>
+            <span class="dock-menu-label">目录</span>
+          </button>
+
+          <!-- 🧭 导航按钮 -->
+          <button
+            class="navbar-dock-menu-trigger"
+            :class="{ 'is-active': activePanel === 'nav' }"
+            @click="togglePanel('nav')"
+            :aria-label="navbarConfig.mobileMenu.ariaLabel"
+          >
+            <svg
+              class="dock-menu-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="3" width="7" height="7" rx="1.5" />
+              <rect x="14" y="3" width="7" height="7" rx="1.5" />
+              <rect x="14" y="14" width="7" height="7" rx="1.5" />
+              <rect x="3" y="14" width="7" height="7" rx="1.5" />
+            </svg>
+            <span class="dock-menu-label">导航</span>
+          </button>
+        </div>
+
+        <div class="navbar-dock-right">
+          <!-- 📁 分类按钮 -->
+          <button
+            v-if="hasCategory"
+            class="navbar-dock-menu-trigger"
+            :class="{ 'is-active': activePanel === 'category' }"
+            @click="togglePanel('category')"
+            aria-label="文档分类"
+          >
+            <svg
+              class="dock-menu-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+            </svg>
+            <span class="dock-menu-label">分类</span>
+          </button>
+        </div>
       </div>
 
       <!-- 📱 移动端菜单按钮 -->
@@ -504,7 +666,9 @@ onUnmounted(() => {
   :class="{ 'is-open': isMobileMenuOpen }"
 >
   <div class="mobile-menu-header">
-    <span class="mobile-menu-title">导航</span>
+    <span class="mobile-menu-title">
+      {{ activePanel === 'toc' ? '📄当前文档目录' : activePanel === 'category' ? categoryPanelTitle : '导航' }}
+    </span>
     <button
       class="mobile-menu-close"
       @click="closeMobileMenu"
@@ -522,101 +686,168 @@ onUnmounted(() => {
       </svg>
     </button>
   </div>
-  <div class="mobile-menu-cards">
-    <template v-for="(link, index) in navbarConfig.links" :key="`mobile-${index}`">
-      <!-- 🔗 有子菜单的项 -->
-      <div
-        v-if="link.children && link.children.length > 0"
-        class="mobile-menu-card has-submenu"
-        :class="{ 'is-active': isMenuActive([link.text]) }"
-      >
-        <span
-          class="mobile-menu-card-header submenu-toggle"
-          @click="toggleSubmenu([link.text], $event)"
-        >
-          {{ link.text }}
-          <svg
-            class="submenu-arrow"
-            :class="{ 'is-rotated': isMenuActive([link.text]) }"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+  <div class="mobile-menu-body">
+    <!-- 🧭 导航面板 -->
+    <template v-if="activePanel === 'nav'">
+      <div class="mobile-menu-cards">
+        <template v-for="(link, index) in navbarConfig.links" :key="`mobile-${index}`">
+          <!-- 🔗 有子菜单的项 -->
+          <div
+            v-if="link.children && link.children.length > 0"
+            class="mobile-menu-card has-submenu"
+            :class="{ 'is-active': isMenuActive([link.text]) }"
           >
-            <path d="M9 18l6-6-6-6" />
-          </svg>
-        </span>
-        <!-- 📂 二级菜单 -->
-        <div v-show="isMenuActive([link.text])" class="mobile-menu-card-body">
-          <template v-for="(child, childIndex) in link.children" :key="`mobile-${index}-${childIndex}`">
-            <!-- 🔗 有三级菜单的项 -->
-            <div
-              v-if="child.children && child.children.length > 0"
-              class="mobile-menu-group has-submenu"
-              :class="{ 'is-active': isMenuActive([link.text, child.text]) }"
+            <span
+              class="mobile-menu-card-header submenu-toggle"
+              @click="toggleSubmenu([link.text], $event)"
             >
-              <span
-                class="mobile-menu-group-title submenu-toggle"
-                @click="toggleSubmenu([link.text, child.text], $event)"
+              {{ link.text }}
+              <svg
+                class="submenu-arrow"
+                :class="{ 'is-rotated': isMenuActive([link.text]) }"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
               >
-                {{ child.text }}
-                <svg
-                  class="submenu-arrow"
-                  :class="{ 'is-rotated': isMenuActive([link.text, child.text]) }"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </span>
+            <!-- 📂 二级菜单 -->
+            <div v-show="isMenuActive([link.text])" class="mobile-menu-card-body">
+              <template v-for="(child, childIndex) in link.children" :key="`mobile-${index}-${childIndex}`">
+                <!-- 🔗 有三级菜单的项 -->
+                <div
+                  v-if="child.children && child.children.length > 0"
+                  class="mobile-menu-group has-submenu"
+                  :class="{ 'is-active': isMenuActive([link.text, child.text]) }"
                 >
-                  <path d="M9 18l6-6-6-6" />
-                </svg>
-              </span>
-              <!-- 📂 三级菜单 -->
-              <div v-show="isMenuActive([link.text, child.text])" class="mobile-menu-list level-2">
+                  <span
+                    class="mobile-menu-group-title submenu-toggle"
+                    @click="toggleSubmenu([link.text, child.text], $event)"
+                  >
+                    {{ child.text }}
+                    <svg
+                      class="submenu-arrow"
+                      :class="{ 'is-rotated': isMenuActive([link.text, child.text]) }"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M9 18l6-6-6-6" />
+                    </svg>
+                  </span>
+                  <!-- 📂 三级菜单 -->
+                  <div v-show="isMenuActive([link.text, child.text])" class="mobile-menu-list level-2">
+                    <a
+                      v-for="(grandChild, grandChildIndex) in child.children"
+                      :key="`mobile-${index}-${childIndex}-${grandChildIndex}`"
+                      :href="grandChild.href"
+                      class="mobile-menu-link"
+                      :target="grandChild.external ? '_blank' : undefined"
+                      :rel="grandChild.external ? 'noopener noreferrer' : undefined"
+                      @click="closeMobileMenu"
+                    >
+                      {{ grandChild.text }}
+                    </a>
+                  </div>
+                </div>
+                <!-- 🔗 普通二级链接 -->
                 <a
-                  v-for="(grandChild, grandChildIndex) in child.children"
-                  :key="`mobile-${index}-${childIndex}-${grandChildIndex}`"
-                  :href="grandChild.href"
+                  v-else
+                  :href="child.href"
                   class="mobile-menu-link"
-                  :target="grandChild.external ? '_blank' : undefined"
-                  :rel="grandChild.external ? 'noopener noreferrer' : undefined"
+                  :target="child.external ? '_blank' : undefined"
+                  :rel="child.external ? 'noopener noreferrer' : undefined"
                   @click="closeMobileMenu"
                 >
-                  {{ grandChild.text }}
+                  {{ child.text }}
                 </a>
-              </div>
+              </template>
             </div>
-            <!-- 🔗 普通二级链接 -->
-            <a
-              v-else
-              :href="child.href"
-              class="mobile-menu-link"
-              :target="child.external ? '_blank' : undefined"
-              :rel="child.external ? 'noopener noreferrer' : undefined"
-              @click="closeMobileMenu"
-            >
-              {{ child.text }}
-            </a>
-          </template>
-        </div>
+          </div>
+          <!-- 🔗 普通一级链接 -->
+          <a
+            v-else
+            :href="link.href"
+            class="mobile-menu-card mobile-menu-card-link"
+            :target="link.external ? '_blank' : undefined"
+            :rel="link.external ? 'noopener noreferrer' : undefined"
+            @click="closeMobileMenu"
+          >
+            <span class="mobile-menu-card-header">
+              {{ link.text }}
+            </span>
+          </a>
+        </template>
       </div>
-      <!-- 🔗 普通一级链接 -->
-      <a
-        v-else
-        :href="link.href"
-        class="mobile-menu-card mobile-menu-card-link"
-        :target="link.external ? '_blank' : undefined"
-        :rel="link.external ? 'noopener noreferrer' : undefined"
-        @click="closeMobileMenu"
-      >
-        <span class="mobile-menu-card-header">
-          {{ link.text }}
-        </span>
-      </a>
+    </template>
+
+    <!-- 📑 目录面板 -->
+    <template v-else-if="activePanel === 'toc'">
+      <nav class="mobile-menu-list mobile-menu-toc">
+        <a
+          v-for="item in toc"
+          :key="item.id"
+          :href="`#${item.id}`"
+          class="mobile-menu-link"
+          :class="`toc-level-${item.level}`"
+          @click.prevent="scrollToTocAnchor(item.id)"
+        >
+          {{ item.text }}
+        </a>
+      </nav>
+    </template>
+
+    <!-- 📁 分类面板 -->
+    <template v-else-if="activePanel === 'category'">
+      <div class="mobile-menu-list mobile-menu-category">
+        <!-- 📂 根目录模式：显示分类树 -->
+        <template v-if="isRootDoc && categoryTree.length > 0">
+          <div
+            v-for="category in categoryTree"
+            :key="category.path"
+            class="mobile-menu-category-group"
+          >
+            <button
+              class="mobile-menu-category-header"
+              @click="toggleCategory(category.path)"
+            >
+              <span class="category-toggle">{{ expandedCategories.has(category.path) ? '📂' : '📁' }}</span>
+              <span class="category-name">{{ category.name }}</span>
+            </button>
+            <div v-show="expandedCategories.has(category.path)" class="mobile-menu-category-links">
+              <a
+                v-for="doc in category.docs"
+                :key="doc.slug"
+                :href="`/${doc.slug}`"
+                class="mobile-menu-link"
+                :class="{ 'is-current': doc.isCurrent }"
+              >
+                {{ doc.title }}
+              </a>
+            </div>
+          </div>
+        </template>
+
+        <!-- 📂 子目录模式：显示当前分类下的文档 -->
+        <template v-else>
+          <a
+            v-for="doc in categoryDocs"
+            :key="doc.slug"
+            :href="`/${doc.slug}`"
+            class="mobile-menu-link"
+            :class="{ 'is-current': doc.isCurrent }"
+          >
+            {{ doc.title }}
+          </a>
+        </template>
+      </div>
     </template>
   </div>
 </div>

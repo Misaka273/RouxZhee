@@ -588,6 +588,31 @@
     margin: 1em 0 0.5em;
   }
 
+  /* 去除内容区第一个标题的顶部外边距，避免与上方卡片产生过大空白 */
+  > h1:first-of-type,
+  > h2:first-of-type,
+  > h3:first-of-type,
+  > h4:first-of-type,
+  > h5:first-of-type,
+  > h6:first-of-type {
+    margin-top: 0;
+  }
+
+  /* 隐藏由 HTML 注释和换行产生的空段落 */
+  > p:first-of-type:not(:has(:not(br))) {
+    display: none;
+  }
+
+  /* 隐藏第一个标题后紧跟的冗余换行标签 */
+  > h1:first-of-type + br,
+  > h2:first-of-type + br,
+  > h3:first-of-type + br,
+  > h4:first-of-type + br,
+  > h5:first-of-type + br,
+  > h6:first-of-type + br {
+    display: none;
+  }
+
   h5, h6 {
     font-size: 1em;
     font-weight: 600;
@@ -1108,8 +1133,26 @@
 }
 
 @media (max-width: 768px) {
+  html {
+    scroll-padding-bottom: calc(
+      var(--mobile-bottom-nav-height) +
+      var(--mobile-bottom-nav-bump-height) +
+      env(safe-area-inset-bottom) +
+      16px
+    );
+  }
+
+  .doc-page {
+    padding-top: 20px;
+  }
+
   .doc-page-title {
     font-size: 1.8rem;
+    padding-top: 16px;
+    margin-bottom: 24px;
+  }
+
+  .doc-main {
     padding-top: 20px;
   }
 
@@ -1121,7 +1164,11 @@
   .doc-content {
     padding: 20px;
 
-    h1 { font-size: 1.6em; }
+    h1 {
+      font-size: 1.6em;
+      margin: 0.8em 0 0.6em;
+    }
+
     h2 { font-size: 1.3em; }
     h3 { font-size: 1.1em; }
   }

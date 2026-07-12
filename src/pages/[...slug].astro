@@ -620,7 +620,16 @@ const seo = createPageSeo({
 
 <Layout seo={seo}>
   <!-- 🧭 导航栏 -->
-  <NavBar client:load />
+  <NavBar
+    client:load
+    toc={toc}
+    showToc={true}
+    categoryDocs={categoryDocs}
+    categoryName={categoryName}
+    categoryFullPath={categoryFullPath}
+    categoryTree={categoryTree}
+    isRootDoc={isRootDoc}
+  />
 
   <!-- 📄 文档内容组件 -->
   <DocContent
