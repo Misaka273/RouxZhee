@@ -1,0 +1,22 @@
+$:
+  vscode:
+    - runner:
+        cpus: 4
+      docker:
+        build: .cnb/Dockerfile
+        volumes:
+          - /root/.npm:copy-on-write
+      services:
+        - vscode
+      env:
+        HISTFILE: /root/.cnb/system/zsh_history
+        CNB_WELCOME_CMD: |
+          echo "RouxZhee Astro 云开发环境已就绪"
+          echo "站点预览将运行在 4321 端口"
+          python3 -m webbrowser "$(echo ${CNB_VSCODE_PROXY_URI} | sed 's/{{port}}/4321/')"
+      stages:
+        - name: 启动 Astro 开发服务
+          timeout: 18h
+          script: |
+            npm ci
+            npm run dev -- --host 0.0.0.0 --port 4321

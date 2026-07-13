@@ -1,0 +1,38 @@
+main:
+  push:
+    - runner:
+        cpus: 4
+      docker:
+        build: .cnb/Dockerfile
+        volumes:
+          - /root/.npm:copy-on-write
+      stages:
+        - name: 安装依赖
+          script: npm ci
+        - name: 构建 Astro 静态站点
+          script: npm run build
+        - name: 检查构建产物
+          script: |
+            test -d dist
+            find dist -maxdepth 2 -type f -print | head -100
+
+"**":
+  web_trigger:
+    - runner:
+        cpus: 4
+      docker:
+        build: .cnb/Dockerfile
+        volumes:
+          - /root/.npm:copy-on-write
+      stages:
+        - name: 安装依赖
+          script: npm ci
+        - name: 构建 Astro 静态站点
+          script: npm run build
+        - name: 检查构建产物
+          script: |
+            test -d dist
+            find dist -maxdepth 2 -type f -print | head -100
+
+include:
+  - .cnb/vscode.yml

@@ -1,0 +1,5 @@
+branch:
+  - buttons:
+      - name: 构建 Astro 静态站
+        description: 安装依赖并生成 dist 静态产物
+        event: web_trigger
