@@ -54,6 +54,10 @@ export default defineConfig({
 
   // 🚀 Vite 构建优化
   vite: {
+    server: {
+      // 允许 CNB 云开发代理域名访问 Astro/Vite dev server
+      allowedHosts: ['.cnb.run'],
+    },
     build: {
       // 📦 CSS 代码分割
       cssCodeSplit: true,
