@@ -10,6 +10,7 @@ $:
         - vscode
       env:
         HISTFILE: /root/.cnb/system/zsh_history
+        __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS: .cnb.run
         CNB_WELCOME_CMD: |
           echo "RouxZhee Astro 云开发环境已就绪"
           echo "站点预览将运行在 4321 端口"
