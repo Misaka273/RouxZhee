@@ -1,0 +1,88 @@
+---
+// 🕊️白木 原创开发 🔗gl.baimu.live
+// 👥 RZ 团队页面入口
+// 配置来源：src/页面模板/team.md
+
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.vue';
+import TeamPage from '../components/TeamPage.vue';
+import { createPageSeo } from '../utils/seo';
+import type { TeamConfig } from '../types/team';
+
+/* 📖 读取团队页面 MD 配置 */
+const teamModules = import.meta.glob('../页面模板/team.md', { eager: true }) as Record<
+  string,
+  { frontmatter?: Record<string, any> }
+>;
+const teamModule = Object.values(teamModules)[0];
+const frontmatter = (teamModule?.frontmatter ?? {}) as Record<string, any>;
+
+/* 🔧 提供默认配置，确保字段缺失时页面仍可渲染 */
+const defaultConfig: TeamConfig = {
+  brand: {
+    logo: '/RouxZhee-LOGO.png',
+    name: 'RouxZhee',
+    shortName: 'RZ',
+  },
+  meaning: {
+    left: { title: 'Roux', lines: ['法语，柔软糊状物'] },
+    right: { title: 'Zhee', lines: ['Zenith，顶点、天顶的起音'] },
+    center: ['整体有着向上', '抵达的优雅上扬感'],
+  },
+  intro: {
+    lines: [
+      'Zhee 是中文「至」的音译谐音，发音为 /ʒiː/ 或 /ziː/',
+      '对应英文 Zenith（顶点、天顶、最高点）作为起始音',
+      '是一个为了承载「到达极致」意境而特意设计的转写词',
+    ],
+  },
+  slogan: {
+    parts: [
+      'RouxZhee',
+      '无论是现在还是未来',
+      '都会以「柔到极致」作为目标',
+    ],
+  },
+  members: [],
+  sponsor: {
+    amounts: [10, 20, 30],
+    buttonText: '投喂',
+    apiUrl: '',
+  },
+};
+
+function mergeTeamConfig(user: Record<string, any>, def: TeamConfig): TeamConfig {
+  return {
+    brand: { ...def.brand, ...(user.brand || {}) },
+    meaning: {
+      left: { ...def.meaning.left, ...(user.meaning?.left || {}) },
+      right: { ...def.meaning.right, ...(user.meaning?.right || {}) },
+      center: user.meaning?.center || def.meaning.center,
+    },
+    intro: {
+      lines: user.intro?.lines || def.intro.lines,
+    },
+    slogan: {
+      parts: user.slogan?.parts || def.slogan.parts,
+    },
+    members: user.members || def.members,
+    sponsor: { ...def.sponsor, ...(user.sponsor || {}) },
+  };
+}
+
+const teamConfig: TeamConfig = mergeTeamConfig(frontmatter, defaultConfig);
+
+const seo = createPageSeo({
+  title: teamConfig.brand.name,
+  description: frontmatter.description || `${teamConfig.brand.name} 团队介绍`,
+  type: 'website',
+});
+---
+
+<Layout seo={seo}>
+  <!-- 🧭 独立导航栏 -->
+  <Navbar client:load="vue" />
+
+  <!-- 👥 团队页面内容 -->
+  <TeamPage client:load="vue" config={teamConfig} />
+</Layout>

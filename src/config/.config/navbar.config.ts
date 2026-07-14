@@ -46,6 +46,7 @@ export const userNavbarConfig: Partial<NavbarConfig> = {
       children: [
         { text: '👤 个人介绍', href: '/about' },
         { text: '🏠 站点概览', href: '/site' },
+        { text: '👥 RZ团队', href: '/team' },
       ],
     },
     { text: '友链', href: 'https://gl.baimu.live', external: true },
