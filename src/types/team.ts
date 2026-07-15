@@ -51,6 +51,8 @@ export interface TeamMember {
   tag: string;
   /** 描述 */
   description: string;
+  /** 个人主页链接 */
+  link?: string;
 }
 
 /** 投喂配置 */

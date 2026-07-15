@@ -50,10 +50,12 @@ members:
     avatar: https://img.xxdevops.cn/blog/avatar/yuwen_avatar.avif
     tag: 主后端
     description: 逃出了地球，没逃出SQL库
+    link: https://wiki.xxdevops.cn
   - name: 白木
     avatar: https://mu.baimu.live/a/img/gura-touxiang-1.png
-    tag: 主后端
+    tag: 主前端
     description: 学了八年机械舞，结果发现写的代码都带卡顿
+    link: https://gl.baimu.live
 
 # ☕ 投喂板块
 sponsor:

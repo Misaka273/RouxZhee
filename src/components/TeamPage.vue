@@ -97,59 +97,175 @@
         </div>
       </section>
 
-      <!-- 团队成员 -->
-      <section class="team-members-section">
-        <h2 class="section-title">👥 团队成员</h2>
-        <div class="members-grid">
-          <div
-            v-for="(member, index) in config.members"
-            :key="`member-${index}`"
-            class="member-card card-with-decoration"
+      <!-- 团队成员 + 投喂支持 -->
+      <div class="team-bottom-section">
+        <section class="team-members-section">
+          <h2 class="section-title">👥 团队成员</h2>
+          <div class="members-grid">
+            <component
+              :is="member.link ? 'a' : 'div'"
+              v-for="(member, index) in config.members"
+              :key="`member-${index}`"
+              :href="member.link"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="member-card card-with-decoration"
+            >
+              <div class="member-avatar-wrapper">
+                <img
+                  :src="member.avatar"
+                  :alt="member.name"
+                  class="member-avatar"
+                  loading="lazy"
+                />
+              </div>
+              <div class="member-info">
+                <div class="member-header">
+                  <h3 class="member-name">{{ member.name }}</h3>
+                  <span class="member-tag">{{ member.tag }}</span>
+                </div>
+                <p class="member-description">{{ member.description }}</p>
+              </div>
+            </component>
+          </div>
+        </section>
+
+        <section class="team-sponsor-section">
+          <h2 class="section-title">☕ 投喂支持</h2>
+          <div class="sponsor-amounts">
+            <button
+              v-for="(amount, index) in config.sponsor.amounts"
+              :key="`amount-${index}`"
+              type="button"
+              class="sponsor-amount-card"
+              :class="{ active: selectedAmount === amount }"
+              @click="selectedAmount = amount"
+            >
+              <span class="amount-value">{{ amount }}</span>
+              <span class="amount-unit">元</span>
+            </button>
+          </div>
+          <button
+            type="button"
+            class="sponsor-button"
+            :disabled="!selectedAmount"
+            @click="handleSponsor"
           >
-            <div class="member-avatar-wrapper">
+            {{ config.sponsor.buttonText }}
+          </button>
+        </section>
+      </div>
+
+      <!-- RouxZhee 主题 -->
+      <section class="team-themes-section">
+        <h2 class="section-title">🎨 RouxZhee 主题</h2>
+        <div class="themes-grid">
+          <a
+            v-for="(theme, index) in themes"
+            :key="`theme-${index}`"
+            :href="theme.link"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="theme-card card-with-decoration"
+          >
+            <div class="theme-cover-wrapper">
               <img
-                :src="member.avatar"
-                :alt="member.name"
-                class="member-avatar"
+                :src="theme.cover"
+                :alt="theme.title"
+                class="theme-cover"
                 loading="lazy"
               />
             </div>
-            <div class="member-info">
-              <div class="member-header">
-                <h3 class="member-name">{{ member.name }}</h3>
-                <span class="member-tag">{{ member.tag }}</span>
-              </div>
-              <p class="member-description">{{ member.description }}</p>
+            <div class="theme-wave-divider" aria-hidden="true">
+              <svg
+                viewBox="-12 0 36 120"
+                preserveAspectRatio="none"
+                class="theme-wave-svg"
+              >
+                <path
+                  d="M0,0 C4,0 12,20 12,30 C12,40 4,60 0,60 C-4,60 -12,80 -12,90 C-12,100 -4,120 0,120 L24,120 L24,0 Z"
+                  fill="var(--about-card-bg)"
+                />
+              </svg>
             </div>
-          </div>
+            <div class="theme-info">
+              <div class="theme-header">
+                <h3 class="theme-title">{{ theme.title }}</h3>
+                <span v-if="theme.tag" class="theme-tag">{{ theme.tag }}</span>
+              </div>
+              <p class="theme-description">{{ theme.description }}</p>
+            </div>
+          </a>
         </div>
       </section>
 
-      <!-- 投喂板块 -->
-      <section class="team-sponsor-section">
-        <h2 class="section-title">☕ 投喂支持</h2>
-        <div class="sponsor-amounts">
-          <button
-            v-for="(amount, index) in config.sponsor.amounts"
-            :key="`amount-${index}`"
-            type="button"
-            class="sponsor-amount-card"
-            :class="{ active: selectedAmount === amount }"
-            @click="selectedAmount = amount"
+      <!-- RouxZhee 插件 -->
+      <section class="team-plugins-section">
+        <h2 class="section-title">🔌 RouxZhee 插件</h2>
+        <div class="plugins-grid">
+          <a
+            v-for="(plugin, index) in plugins"
+            :key="`plugin-${index}`"
+            :href="plugin.link"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="plugin-card card-with-decoration"
           >
-            <span class="amount-value">{{ amount }}</span>
-            <span class="amount-unit">元</span>
+            <div class="plugin-cover-wrapper">
+              <img
+                :src="plugin.cover"
+                :alt="plugin.title"
+                class="plugin-cover"
+                loading="lazy"
+              />
+            </div>
+            <div class="plugin-wave-divider" aria-hidden="true">
+              <svg
+                viewBox="-12 0 36 120"
+                preserveAspectRatio="none"
+                class="plugin-wave-svg"
+              >
+                <path
+                  d="M0,0 C4,0 12,20 12,30 C12,40 4,60 0,60 C-4,60 -12,80 -12,90 C-12,100 -4,120 0,120 L24,120 L24,0 Z"
+                  fill="var(--about-card-bg)"
+                />
+              </svg>
+            </div>
+            <div class="plugin-info">
+              <h3 class="plugin-title">{{ plugin.title }}</h3>
+              <p class="plugin-description">{{ plugin.description }}</p>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <!-- ⏳ 页面时间线导航 -->
+      <nav class="team-timeline" aria-label="页面导航">
+        <div class="timeline-track">
+          <button
+            v-for="(item, index) in timelineItems"
+            :key="`timeline-${index}`"
+            type="button"
+            class="timeline-node"
+            :class="{ active: activeIndex === index }"
+            :aria-label="item.label"
+            @click="scrollToSection(item.selector)"
+            @mouseenter="hoveredIndex = index"
+            @mouseleave="hoveredIndex = null"
+          >
+            <span class="timeline-dot"></span>
+            <Transition name="timeline-bubble">
+              <span
+                v-if="hoveredIndex === index"
+                class="timeline-bubble"
+              >
+                <strong class="timeline-bubble-title">{{ item.label }}</strong>
+                <span class="timeline-bubble-desc">{{ item.description }}</span>
+              </span>
+            </Transition>
           </button>
         </div>
-        <button
-          type="button"
-          class="sponsor-button"
-          :disabled="!selectedAmount"
-          @click="handleSponsor"
-        >
-          {{ config.sponsor.buttonText }}
-        </button>
-      </section>
+      </nav>
     </main>
   </div>
 </template>
@@ -157,7 +273,7 @@
 <script setup lang="ts">
 /* 👥 RZ 团队页面组件脚本 */
 
-import { ref, computed, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import type { TeamConfig } from '../types/team';
 
 interface Props {
@@ -166,6 +282,102 @@ interface Props {
 
 const props = defineProps<Props>();
 const config = props.config;
+
+/* 🎨 RouxZhee 主题数据 */
+interface ThemeItem {
+  title: string;
+  description: string;
+  link: string;
+  cover: string;
+  tag?: string;
+}
+
+const themes: ThemeItem[] = [
+  {
+    title: 'RouxZhee',
+    description: '当前正在使用的官方主题，清新极简，专注阅读体验',
+    link: '/',
+    cover: '/assets/shiroki.avif',
+    tag: '当前主题',
+  },
+  {
+    title: '文档主题',
+    description: '为文档中心设计的主题，结构清晰，检索高效',
+    link: '/doc/',
+    cover: '/assets/img/RouxZhee-shilitu.jpg',
+  },
+  {
+    title: '企业主题',
+    description: '适合企业官网的商务风格主题，稳重专业',
+    link: '/about/',
+    cover: '/assets/img/fileName.png',
+  },
+  {
+    title: '导航主题',
+    description: '聚合常用链接的导航首页主题，一目了然',
+    link: '/site/',
+    cover: '/RouxZhee-LOGO.png',
+  },
+];
+
+/* 🔌 RouxZhee 插件数据 */
+interface PluginItem {
+  title: string;
+  description: string;
+  link: string;
+  cover: string;
+}
+
+const plugins: PluginItem[] = [
+  {
+    title: '会员等级插件',
+    description: '灵活的会员等级体系，支持积分与权限联动',
+    link: '#',
+    cover: '/assets/shiroki.avif',
+  },
+  {
+    title: '特效插件',
+    description: '为背景与交互添加丰富动效，提升页面活力',
+    link: '#',
+    cover: '/assets/img/RouxZhee-shilitu.jpg',
+  },
+  {
+    title: '后台管理',
+    description: '可视化后台管理面板，轻松配置站点内容与用户',
+    link: '#',
+    cover: '/assets/img/fileName.png',
+  },
+  {
+    title: '统计插件',
+    description: '集成访问统计与数据分析，掌握站点运营状况',
+    link: '#',
+    cover: '/RouxZhee-LOGO.png',
+  },
+  {
+    title: '付费内容插件',
+    description: '支持文章、资源付费解锁，构建内容变现能力',
+    link: '#',
+    cover: '/assets/img/RouxZhee-shilitu.jpg',
+  },
+  {
+    title: '登录注册插件',
+    description: '提供完整的登录、注册与密码找回流程',
+    link: '#',
+    cover: '/assets/shiroki.avif',
+  },
+  {
+    title: '用户管理',
+    description: '集中管理用户信息、状态与权限分配',
+    link: '#',
+    cover: '/RouxZhee-LOGO.png',
+  },
+  {
+    title: '权限插件',
+    description: '细粒度权限控制，为不同角色分配功能访问权',
+    link: '#',
+    cover: '/assets/img/fileName.png',
+  },
+];
 
 /* 📏 取最长 Slogan 文本，用于自适应卡片宽度 */
 const longestSlogan = computed(() => {
@@ -282,10 +494,139 @@ function resumeSloganCarousel() {
   });
 }
 
+/* ⏳ 页面时间线导航 */
+interface TimelineItem {
+  selector: string;
+  label: string;
+  description: string;
+}
+
+const timelineItems: TimelineItem[] = [
+  {
+    selector: '.team-brand-section',
+    label: '品牌信息',
+    description: '了解 RouxZhee 的品牌由来、含义与核心理念',
+  },
+  {
+    selector: '.team-bottom-section',
+    label: '投喂团队',
+    description: '认识团队成员，选择金额投喂支持项目持续发展',
+  },
+  {
+    selector: '.team-themes-section',
+    label: 'RouxZhee 主题',
+    description: '探索官方主题方案，为站点选择最佳视觉风格',
+  },
+  {
+    selector: '.team-plugins-section',
+    label: 'RouxZhee 插件',
+    description: '按需安装功能插件，扩展站点的业务能力',
+  },
+];
+
+const activeIndex = ref(0);
+const hoveredIndex = ref<number | null>(null);
+let timelineSections: HTMLElement[] = [];
+let timelineScrollListener: (() => void) | null = null;
+
+function scrollToSection(selector: string) {
+  const el = document.querySelector(selector);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function updateTimelineActiveIndex() {
+  if (!timelineSections.length) return;
+  const scrollY = window.scrollY + window.innerHeight / 3;
+  let current = 0;
+  for (let i = timelineSections.length - 1; i >= 0; i--) {
+    const section = timelineSections[i];
+    if (section && section.offsetTop <= scrollY) {
+      current = i;
+      break;
+    }
+  }
+  activeIndex.value = current;
+}
+
+function initTimeline() {
+  if (typeof window === 'undefined') return;
+  timelineSections = timelineItems
+    .map((item) => document.querySelector(item.selector))
+    .filter(Boolean) as HTMLElement[];
+  updateTimelineActiveIndex();
+  timelineScrollListener = () => updateTimelineActiveIndex();
+  window.addEventListener('scroll', timelineScrollListener, { passive: true });
+}
+
+function destroyTimeline() {
+  if (timelineScrollListener) {
+    window.removeEventListener('scroll', timelineScrollListener);
+    timelineScrollListener = null;
+  }
+  timelineSections = [];
+}
+
+/* 🎴 卡片 3D 跟随鼠标倾斜效果 */
+const TILT_MAX_ANGLE = 10;
+const TILT_CARDS_SELECTOR = '.team-page .card-with-decoration, .team-page .sponsor-amount-card, .team-page .brand-logo-wrapper';
+
+function handleTiltMove(event: MouseEvent) {
+  const card = event.currentTarget as HTMLElement;
+  if (!card) return;
+  const rect = card.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+  const centerX = rect.width / 2;
+  const centerY = rect.height / 2;
+  const rotateX = ((y - centerY) / centerY) * -TILT_MAX_ANGLE;
+  const rotateY = ((x - centerX) / centerX) * TILT_MAX_ANGLE;
+  card.style.setProperty('--tilt-x', `${rotateX}deg`);
+  card.style.setProperty('--tilt-y', `${rotateY}deg`);
+  card.classList.add('is-tilted');
+}
+
+function handleTiltLeave(event: MouseEvent) {
+  const card = event.currentTarget as HTMLElement;
+  if (!card) return;
+  card.classList.remove('is-tilted');
+  card.style.setProperty('--tilt-x', '0deg');
+  card.style.setProperty('--tilt-y', '0deg');
+}
+
+let tiltCards: HTMLElement[] = [];
+function initTiltEffect() {
+  if (typeof window === 'undefined') return;
+  tiltCards = Array.from(document.querySelectorAll(TILT_CARDS_SELECTOR)) as HTMLElement[];
+  tiltCards.forEach((card) => {
+    card.addEventListener('mousemove', handleTiltMove);
+    card.addEventListener('mouseleave', handleTiltLeave);
+  });
+}
+
+function destroyTiltEffect() {
+  tiltCards.forEach((card) => {
+    card.removeEventListener('mousemove', handleTiltMove);
+    card.removeEventListener('mouseleave', handleTiltLeave);
+    card.classList.remove('is-tilted');
+    card.style.removeProperty('--tilt-x');
+    card.style.removeProperty('--tilt-y');
+  });
+  tiltCards = [];
+}
+
+onMounted(() => {
+  initTiltEffect();
+  initTimeline();
+});
+
 onUnmounted(() => {
   if (pauseTimerId != null) {
     clearTimeout(pauseTimerId);
   }
+  destroyTiltEffect();
+  destroyTimeline();
 });
 </script>
 
