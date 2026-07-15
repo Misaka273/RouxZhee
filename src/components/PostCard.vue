@@ -6,87 +6,89 @@
 
 <template>
   <article class="post-card">
-    <!-- 🖼️ 文档封面 -->
-    <a
-      :href="post.url"
-      class="post-cover-wrapper"
-      :aria-label="`查看文章：${post.title}`"
-    >
-      <picture>
-        <!-- 🎨 使用 picture 元素支持多种格式 -->
-        <source
-          v-if="!isDataUrl(post.cover)"
-          :srcset="generateSrcSet(post.cover, [400, 600, 800])"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          type="image/webp"
-        />
-        <img
-          :src="post.cover"
-          :alt="post.title"
-          class="post-cover"
-          loading="lazy"
-          decoding="async"
-          :srcset="isDataUrl(post.cover) ? undefined : generateSrcSet(post.cover)"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          @load="handleImageLoad"
-          @error="handleImageError"
-        />
-      </picture>
-      <!-- ✨ 悬停遮罩 -->
-      <div class="post-cover-overlay">
-        <div class="post-cover-icon-wrapper">
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><defs><clipPath id="lineMdWatchTwotoneLoop0"><rect width="24" height="12"></rect></clipPath><symbol id="lineMdWatchTwotoneLoop1"><path fill="#fff" fill-opacity="0" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" data-swindex="0" d="M23 16.5C23 10.4249 18.0751 5.5 12 5.5C5.92487 5.5 1 10.4249 1 16.5z" clip-path="url(#lineMdWatchTwotoneLoop0)"><animate attributeName="d" dur="6s" keyTimes="0;0.07;0.93;1" repeatCount="indefinite" values="M23 16.5C23 11.5 18.0751 12 12 12C5.92487 12 1 11.5 1 16.5z;M23 16.5C23 10.4249 18.0751 5.5 12 5.5C5.92487 5.5 1 10.4249 1 16.5z;M23 16.5C23 10.4249 18.0751 5.5 12 5.5C5.92487 5.5 1 10.4249 1 16.5z;M23 16.5C23 11.5 18.0751 12 12 12C5.92487 12 1 11.5 1 16.5z"></animate><animate fill="freeze" attributeName="fill-opacity" begin="0.6s" dur="0.15s" values="0;0.3"></animate></path></symbol><mask id="lineMdWatchTwotoneLoop2"><use href="#lineMdWatchTwotoneLoop1"></use><use href="#lineMdWatchTwotoneLoop1" transform="rotate(180 12 12)"></use><circle cx="12" cy="12" r="0" fill="#fff"><animate attributeName="r" dur="6s" keyTimes="0;0.03;0.97;1" repeatCount="indefinite" values="0;3;3;0"></animate></circle></mask></defs><rect width="24" height="24" fill="#9e9e9e" mask="url(#lineMdWatchTwotoneLoop2)"></rect></svg>
-        </div>
-      </div>
-    </a>
-
-    <!-- 🌊 波浪分割线 -->
-    <div class="post-wave-divider">
-      <svg viewBox="0 0 1440 60" preserveAspectRatio="none" class="wave-svg">
-        <path d="M0,30 C240,60 480,0 720,30 C960,60 1200,0 1440,30 L1440,60 L0,60 Z" fill="var(--glass-bg-doc)"/>
-      </svg>
-    </div>
-
-    <!-- 📝 文档信息 -->
-    <div class="post-content">
-      <!-- 📌 标题 -->
-      <h3 class="post-title">
-        <a :href="post.url" class="post-title-link">
-          {{ post.title }}
-        </a>
-      </h3>
-
-      <!-- 📝 描述 -->
-      <div
-        v-if="post.description"
-        class="post-description-wrapper"
+    <div class="post-card-inner">
+      <!-- 🖼️ 文档封面 -->
+      <a
+        :href="post.url"
+        class="post-cover-wrapper"
+        :aria-label="`查看文章：${post.title}`"
       >
-        <p
-          class="post-description"
-          @mouseenter="handleDescriptionEnter"
-          @mouseleave="handleDescriptionLeave"
-        >
-          {{ post.description }}
-        </p>
-        <div
-          class="post-description-tooltip"
-          :class="{ show: showTooltip }"
-          role="tooltip"
-        >
-          {{ post.description }}
+        <picture>
+          <!-- 🎨 使用 picture 元素支持多种格式 -->
+          <source
+            v-if="!isDataUrl(post.cover)"
+            :srcset="generateSrcSet(post.cover, [400, 600, 800])"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            type="image/webp"
+          />
+          <img
+            :src="post.cover"
+            :alt="post.title"
+            class="post-cover"
+            loading="lazy"
+            decoding="async"
+            :srcset="isDataUrl(post.cover) ? undefined : generateSrcSet(post.cover)"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            @load="handleImageLoad"
+            @error="handleImageError"
+          />
+        </picture>
+        <!-- ✨ 悬停遮罩 -->
+        <div class="post-cover-overlay">
+          <div class="post-cover-icon-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><defs><clipPath id="lineMdWatchTwotoneLoop0"><rect width="24" height="12"></rect></clipPath><symbol id="lineMdWatchTwotoneLoop1"><path fill="#fff" fill-opacity="0" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" data-swindex="0" d="M23 16.5C23 10.4249 18.0751 5.5 12 5.5C5.92487 5.5 1 10.4249 1 16.5z" clip-path="url(#lineMdWatchTwotoneLoop0)"><animate attributeName="d" dur="6s" keyTimes="0;0.07;0.93;1" repeatCount="indefinite" values="M23 16.5C23 11.5 18.0751 12 12 12C5.92487 12 1 11.5 1 16.5z;M23 16.5C23 10.4249 18.0751 5.5 12 5.5C5.92487 5.5 1 10.4249 1 16.5z;M23 16.5C23 10.4249 18.0751 5.5 12 5.5C5.92487 5.5 1 10.4249 1 16.5z;M23 16.5C23 11.5 18.0751 12 12 12C5.92487 12 1 11.5 1 16.5z"></animate><animate fill="freeze" attributeName="fill-opacity" begin="0.6s" dur="0.15s" values="0;0.3"></animate></path></symbol><mask id="lineMdWatchTwotoneLoop2"><use href="#lineMdWatchTwotoneLoop1"></use><use href="#lineMdWatchTwotoneLoop1" transform="rotate(180 12 12)"></use><circle cx="12" cy="12" r="0" fill="#fff"><animate attributeName="r" dur="6s" keyTimes="0;0.03;0.97;1" repeatCount="indefinite" values="0;3;3;0"></animate></circle></mask></defs><rect width="24" height="24" fill="#9e9e9e" mask="url(#lineMdWatchTwotoneLoop2)"></rect></svg>
+          </div>
         </div>
+      </a>
+
+      <!-- 🌊 波浪分割线 -->
+      <div class="post-wave-divider">
+        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" class="wave-svg">
+          <path d="M0,30 C240,60 480,0 720,30 C960,60 1200,0 1440,30 L1440,60 L0,60 Z" fill="var(--glass-bg-doc)"/>
+        </svg>
       </div>
 
-      <!-- 📅 发布时间 -->
-      <time class="post-date" :datetime="post.date">
-        <svg class="post-date-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-          <line x1="16" y1="2" x2="16" y2="6"/>
-          <line x1="8" y1="2" x2="8" y2="6"/>
-          <line x1="3" y1="10" x2="21" y2="10"/>
-        </svg>
-        {{ formatDate(post.date) }}
-      </time>
+      <!-- 📝 文档信息 -->
+      <div class="post-content">
+        <!-- 📌 标题 -->
+        <h3 class="post-title">
+          <a :href="post.url" class="post-title-link">
+            {{ post.title }}
+          </a>
+        </h3>
+
+        <!-- 📝 描述 -->
+        <div
+          v-if="post.description"
+          class="post-description-wrapper"
+        >
+          <p
+            class="post-description"
+            @mouseenter="handleDescriptionEnter"
+            @mouseleave="handleDescriptionLeave"
+          >
+            {{ post.description }}
+          </p>
+          <div
+            class="post-description-tooltip"
+            :class="{ show: showTooltip }"
+            role="tooltip"
+          >
+            {{ post.description }}
+          </div>
+        </div>
+
+        <!-- 📅 发布时间 -->
+        <time class="post-date" :datetime="post.date">
+          <svg class="post-date-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          {{ formatDate(post.date) }}
+        </time>
+      </div>
     </div>
   </article>
 </template>
@@ -148,6 +150,30 @@ const handleImageError = (event: Event) => {
 /* 🎨 文档内容卡片样式 */
 
 .post-card {
+  position: relative;
+  z-index: 5;
+
+  &:hover {
+    z-index: 10;
+
+    .post-card-inner {
+      transform: var(--card-transform-hover);
+      box-shadow: var(--card-shadow-hover);
+
+      .post-cover-wrapper {
+        .post-cover {
+          transform: var(--post-cover-scale-hover);
+        }
+
+        .post-cover-overlay {
+          opacity: var(--card-overlay-opacity-hover);
+        }
+      }
+    }
+  }
+}
+
+.post-card-inner {
   /* 📦 基础布局 */
   display: flex;
   flex-direction: column;
@@ -161,36 +187,6 @@ const handleImageError = (event: Event) => {
   transition: transform var(--transition-normal), box-shadow var(--transition-normal);
   transform: translateZ(0);
   will-change: transform, box-shadow;
-  z-index: 5;
-
-  /* 🎯 扩展悬停触发区域到底部及左右边缘外侧，避免上移时鼠标离开导致抽搐 */
-  &::after {
-    content: '';
-    position: absolute;
-    left: -6px;
-    right: -6px;
-    bottom: -6px;
-    height: 12px;
-    pointer-events: auto;
-    z-index: -1;
-  }
-
-  /* ✨ 悬停效果 */
-  &:hover {
-    transform: var(--card-transform-hover);
-    box-shadow: var(--card-shadow-hover);
-    z-index: 10;
-
-    .post-cover-wrapper {
-      .post-cover {
-        transform: var(--post-cover-scale-hover);
-      }
-
-      .post-cover-overlay {
-        opacity: var(--card-overlay-opacity-hover);
-      }
-    }
-  }
 
   /* 🖼️ 封面区域 */
   .post-cover-wrapper {
@@ -372,25 +368,27 @@ const handleImageError = (event: Event) => {
 /* 🌙 暗色模式适配 */
 :global(.dark-mode) {
   .post-card {
-    background: var(--glass-bg-doc);
-    border-color: var(--glass-border);
+    .post-card-inner {
+      background: var(--glass-bg-doc);
+      border-color: var(--glass-border);
 
-    .post-content {
-      .post-title-link {
-        color: var(--text-color);
+      .post-content {
+        .post-title-link {
+          color: var(--text-color);
 
-        &:hover {
-          color: var(--primary-color);
+          &:hover {
+            color: var(--primary-color);
+          }
         }
-      }
 
-      .post-description {
-        color: var(--text-secondary);
-      }
+        .post-description {
+          color: var(--text-secondary);
+        }
 
-      .post-date {
-        color: var(--text-secondary);
-        border-top: var(--card-date-border-top);
+        .post-date {
+          color: var(--text-secondary);
+          border-top: var(--card-date-border-top);
+        }
       }
     }
   }
