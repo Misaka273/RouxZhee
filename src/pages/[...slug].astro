@@ -5,6 +5,8 @@
 /* 📁 文件系统操作 */
 import { readFileSync, existsSync, readdirSync, statSync } from 'fs';
 import { resolve, join, dirname } from 'path';
+import { pathToFileURL } from 'url';
+import { createMarkdownProcessor } from '@astrojs/markdown-remark';
 
 /* 🧩 页面组件导入 */
 import Layout from '../layouts/Layout.astro';
@@ -548,42 +550,151 @@ if (existsSync(filePath)) {
   }
 }
 
-// 🔽简单 Markdown 转 HTML（基础实现）
-function markdownToHtml(md: string): string {
-  let html = md
-    // 代码块
-    .replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>')
-    // 行内代码
-    .replace(/`([^`]+)`/g, '<code>$1</code>')
-    // 标题
-    .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-    // 粗体
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    // 斜体
-    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    // 图片
-    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" title="$1">')
-    // 链接
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
-    // 无序列表
-    .replace(/^\s*[-*+]\s+(.+)$/gim, '<li>$1</li>')
-    // 有序列表
-    .replace(/^\s*\d+\.\s+(.+)$/gim, '<li>$1</li>')
-    // 引用块
-    .replace(/^>\s*(.+)$/gim, '<blockquote>$1</blockquote>')
-    // 分隔线
-    .replace(/^---$/gim, '<hr>')
-    // 段落
-    .replace(/\n\n/g, '</p><p>')
-    // 换行
-    .replace(/\n/g, '<br>');
+type CustomBlockType = 'info' | 'tip' | 'warning' | 'danger' | 'details';
 
-  return `<p>${html}</p>`;
+const customBlockMeta: Record<CustomBlockType, { icon: string; title: string }> = {
+  info: { icon: 'ℹ️', title: '信息' },
+  tip: { icon: '💡', title: '提示' },
+  warning: { icon: '⚠️', title: '注意' },
+  danger: { icon: '🚫', title: '警告' },
+  details: { icon: '📋', title: '详情' },
+};
+
+const markdownProcessor = await createMarkdownProcessor({
+  syntaxHighlight: false,
+  gfm: true,
+  smartypants: false,
+});
+
+// 🔽Markdown 转 HTML（支持 VitePress 风格 ::: 容器）
+async function markdownToHtml(md: string, filePath: string, frontmatter: Record<string, any>): Promise<string> {
+  const markdownBlocks: string[] = [];
+  const protectedMarkdown = protectMarkdownFences(md, markdownBlocks);
+  const withoutComments = stripHtmlComments(protectedMarkdown);
+  const withContainers = await renderCustomContainers(withoutComments, markdownBlocks, filePath, frontmatter);
+  const restoredMarkdown = restoreMarkdownBlocks(withContainers, markdownBlocks);
+  return renderMarkdown(restoredMarkdown, filePath, frontmatter);
 }
 
-const rawHtml = markdownToHtml(rawContent);
+function protectMarkdownFences(md: string, markdownBlocks: string[]): string {
+  return md.replace(/(^|\n)(`{3,}|~{3,})([^\n]*)\n([\s\S]*?)\n\2[ \t]*(?=\n|$)/g, (match, leadingNewline = '') => {
+    return `${leadingNewline}${markdownBlockToken(markdownBlocks, match.trimStart())}`;
+  });
+}
+
+async function renderCustomContainers(
+  md: string,
+  markdownBlocks: string[],
+  filePath: string,
+  frontmatter: Record<string, any>,
+): Promise<string> {
+  const lines = md.split(/\r?\n/);
+  const output: string[] = [];
+
+  for (let index = 0; index < lines.length; index++) {
+    const open = parseCustomBlockOpen(lines[index]);
+    if (!open) {
+      output.push(lines[index]);
+      continue;
+    }
+
+    const closeIndex = findCustomBlockClose(lines, index + 1, open.fenceLength);
+    if (closeIndex === -1) {
+      output.push(lines[index]);
+      continue;
+    }
+
+    const innerMarkdown = lines.slice(index + 1, closeIndex).join('\n');
+    const innerWithContainers = await renderCustomContainers(innerMarkdown, markdownBlocks, filePath, frontmatter);
+    const innerRestoredMarkdown = restoreMarkdownBlocks(innerWithContainers, markdownBlocks);
+    const innerHtml = await renderMarkdown(innerRestoredMarkdown, filePath, frontmatter);
+    const containerHtml = renderCustomBlock(open.type, open.title, innerHtml);
+
+    output.push(containerHtml);
+    index = closeIndex;
+  }
+
+  return output.join('\n');
+}
+
+function parseCustomBlockOpen(line: string): { fenceLength: number; type: CustomBlockType; title: string } | null {
+  const match = line.match(/^\s*(:{3,})\s*(info|tip|warning|danger|details)(?:\s+(.*))?\s*$/);
+  if (!match) {
+    return null;
+  }
+
+  const type = match[2] as CustomBlockType;
+  return {
+    fenceLength: match[1].length,
+    type,
+    title: (match[3] || customBlockMeta[type].title).trim(),
+  };
+}
+
+function findCustomBlockClose(lines: string[], start: number, fenceLength: number): number {
+  for (let index = start; index < lines.length; index++) {
+    const match = lines[index].match(/^\s*(:{3,})\s*$/);
+    if (match && match[1].length >= fenceLength) {
+      return index;
+    }
+  }
+  return -1;
+}
+
+function renderCustomBlock(type: CustomBlockType, title: string, contentHtml: string): string {
+  const meta = customBlockMeta[type];
+  const titleHtml = `<span class="rz-custom-block__icon">${meta.icon}</span><span class="rz-custom-block__title-text">${escapeHtml(title || meta.title)}</span>`;
+
+  if (type === 'details') {
+    return [
+      `<details class="rz-custom-block rz-custom-block--${type}">`,
+      `<summary class="rz-custom-block__title">${titleHtml}</summary>`,
+      `<div class="rz-custom-block__content">${contentHtml}</div>`,
+      '</details>',
+    ].join('');
+  }
+
+  return [
+    `<div class="rz-custom-block rz-custom-block--${type}">`,
+    `<div class="rz-custom-block__title">${titleHtml}</div>`,
+    `<div class="rz-custom-block__content">${contentHtml}</div>`,
+    '</div>',
+  ].join('');
+}
+
+async function renderMarkdown(md: string, filePath: string, frontmatter: Record<string, any>): Promise<string> {
+  const result = await markdownProcessor.render(md, {
+    fileURL: pathToFileURL(filePath),
+    frontmatter,
+  });
+  return result.code;
+}
+
+function stripHtmlComments(md: string): string {
+  return md.replace(/<!--[\s\S]*?-->/g, '');
+}
+
+function markdownBlockToken(markdownBlocks: string[], markdown: string): string {
+  const token = `@@ROUXZHEE_MARKDOWN_BLOCK_${markdownBlocks.length}@@`;
+  markdownBlocks.push(markdown);
+  return token;
+}
+
+function restoreMarkdownBlocks(md: string, markdownBlocks: string[]): string {
+  return markdownBlocks.reduce(
+    (result, block, index) => result.replaceAll(`@@ROUXZHEE_MARKDOWN_BLOCK_${index}@@`, block),
+    md,
+  );
+}
+
+function escapeHtml(value: string): string {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+const rawHtml = await markdownToHtml(rawContent, filePath, meta);
 const html = addHeadingIds(rawHtml);
 
 // 🔽解析目录

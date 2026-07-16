@@ -16,6 +16,9 @@ coverage
 
 # build output
 dist/
+.site-data/
+.rouxzhee-tools/
+
 # generated types
 .astro/
 

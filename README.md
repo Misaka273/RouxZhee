@@ -93,6 +93,21 @@ npm start
 
 开发服务器默认运行在 http://localhost:4321
 
+启动前会自动执行 RouxZhee Tools：
+
+1. 判断当前系统是 Windows、Linux 还是 macOS。
+2. 下载或复用对应平台的 `rz-tools` 二进制。
+3. 执行 `rz-tools content export --framework astro --input doc --output .site-data`。
+4. 完成内容解析后再启动 Astro。
+
+CNB 或其他云开发环境需要配置下载清单地址：
+
+```bash
+ROUXZHEE_TOOLS_MANIFEST_URL=https://your-tools-download-domain/list
+```
+
+如果本机旁边存在 `../rouxzhee-tools/bin/`，启动脚本会优先复用本地构建产物，方便开发调试。正式对外使用时建议给 `rouxzhee-tools-download` 绑定自定义域名，不要把 EdgeOne 预设域名的临时 `eo_token` 写进仓库。
+
 ### 🔨 构建生产版本
 
 ```bash

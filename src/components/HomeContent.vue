@@ -87,18 +87,13 @@ import { PerformanceMonitor } from '../utils/performance';
 const props = defineProps<{
   categories?: CloudItem[];
   tags?: CloudItem[];
+  initialPosts?: Post[];
 }>();
 
 /* ☁️ 云标签数据透传 */
 const categories = computed<CloudItem[]>(() => props.categories ?? []);
 const tags = computed<CloudItem[]>(() => props.tags ?? []);
 
-/* 📝 文档列表数据 */
-const posts = ref<Post[]>([]);
-const allPosts = ref<Post[]>([]);
-const isLoading = ref(false);
-const hasMorePosts = ref(true);
-const currentPage = ref(1);
 const postsPerPage = 9;
 
 /* 📄 默认封面图集合 */
@@ -139,6 +134,42 @@ const getRandomCover = (): string => {
 
 /* 📄 默认封面（使用第一组作为后备） */
 const defaultCover = defaultCovers[0];
+
+const sortPostsByDate = (postList: Post[]): Post[] => {
+  return [...postList].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+};
+
+const normalizePost = (post: Post): Post => {
+  return {
+    slug: String(post.slug || ''),
+    title: String(post.title || post.slug || ''),
+    description: post.description ? String(post.description) : '',
+    cover: post.cover ? String(post.cover) : defaultCover,
+    date: post.date ? String(post.date) : new Date().toISOString().split('T')[0],
+    url: post.url ? String(post.url) : `/${post.slug}`,
+    tags: Array.isArray(post.tags) ? post.tags.map(String) : [],
+    category: post.category ? String(post.category) : '',
+    readTime: post.readTime ? String(post.readTime) : '',
+    titleIcon: post.titleIcon ? String(post.titleIcon) : '',
+  };
+};
+
+const applyPosts = (postList: Post[]) => {
+  const normalizedPosts = sortPostsByDate(postList.map(normalizePost));
+  allPosts.value = normalizedPosts;
+  posts.value = normalizedPosts.slice(0, postsPerPage);
+  currentPage.value = 2;
+  hasMorePosts.value = normalizedPosts.length > postsPerPage;
+};
+
+const initialPostList = sortPostsByDate((props.initialPosts ?? []).map(normalizePost));
+
+/* 📝 文档列表数据 */
+const posts = ref<Post[]>(initialPostList.slice(0, postsPerPage));
+const allPosts = ref<Post[]>(initialPostList);
+const isLoading = ref(false);
+const hasMorePosts = ref(initialPostList.length > postsPerPage);
+const currentPage = ref(initialPostList.length > 0 ? 2 : 1);
 
 /*  从文件路径提取 slug */
 const extractSlug = (path: string): string => {
@@ -242,10 +273,7 @@ const loadAllPosts = async () => {
       loadedPosts.push(post);
     }
 
-    // 📅 按日期降序排序
-    loadedPosts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-    allPosts.value = loadedPosts;
+    applyPosts(loadedPosts);
     PerformanceMonitor.endMark('loadAllPosts');
   } catch (error) {
     console.error('❌ 加载文档失败:', error);
@@ -279,14 +307,12 @@ const loadMore = async () => {
 
 /* 🔄 初始化加载 */
 onMounted(async () => {
-  // 📄 加载所有文档
-  await loadAllPosts();
+  if (allPosts.value.length > 0) {
+    return;
+  }
 
-  // 初始加载第一页
-  const initialPosts = allPosts.value.slice(0, postsPerPage);
-  posts.value = initialPosts;
-  currentPage.value = 2;
-  hasMorePosts.value = allPosts.value.length > postsPerPage;
+  // 📄 没有服务端 .site-data 时，回退到客户端加载
+  await loadAllPosts();
 });
 </script>
 

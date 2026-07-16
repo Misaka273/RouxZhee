@@ -54,6 +54,7 @@ export default defineConfig({
 
   // 🚀 Vite 构建优化
   vite: {
+    cacheDir: `.astro/vite-cache-${process.getuid?.() ?? 'user'}`,
     server: {
       // 允许 CNB 云开发代理域名访问 Astro/Vite dev server
       allowedHosts: ['.cnb.run'],

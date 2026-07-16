@@ -4,6 +4,7 @@
 // 首页入口 - 博客主页
 
 import { resolve } from 'path';
+import { existsSync, readFileSync } from 'fs';
 import Layout from '../layouts/Layout.astro';
 import Banner from '../components/Banner.vue';
 import HomeContent from '../components/HomeContent.vue';
@@ -11,6 +12,7 @@ import { bannerConfig } from '../config/banner.config';
 import { createPageSeo } from '../utils/seo';
 import { seoConfig } from '../config/seo.config';
 import { getSiteOverviewDocData } from '../utils/siteOverview';
+import type { Post } from '../types/post';
 
 // 📁 文档目录
 const docDir = resolve(process.cwd(), 'doc');
@@ -18,12 +20,90 @@ const docDir = resolve(process.cwd(), 'doc');
 // ☁️ 从 doc 目录读取文档分类云、标签云（与站点概览页一致）
 const docData = getSiteOverviewDocData(docDir);
 
+// 📝 首页文章列表优先读取 rz-tools 生成的 .site-data，保证首页和解析器同源
+const siteDataPath = resolve(process.cwd(), '.site-data/posts.json');
+const initialPosts = getInitialPosts(siteDataPath);
+
 const seo = createPageSeo({
   title: `${bannerConfig.title} - 首页`,
   description: seoConfig.defaultDescription,
   type: 'website',
   useTitleTemplate: false,
 });
+
+function getInitialPosts(filePath: string): Post[] {
+  if (!existsSync(filePath)) {
+    return [];
+  }
+
+  try {
+    const data = JSON.parse(readFileSync(filePath, 'utf-8'));
+    const posts = Array.isArray(data.posts) ? data.posts : [];
+
+    return posts
+      .map((item: any): Post => {
+        const frontMatter = item.frontMatter || {};
+        const slug = String(item.slug || '').replace(/\\/g, '/');
+        const title = String(frontMatter.title || item.title || slug);
+        const content = String(item.contentMarkdown || '');
+
+        return {
+          slug,
+          title,
+          description: String(frontMatter.description || extractDescription(content)),
+          cover: String(frontMatter.cover || '/assets/shiroki.avif'),
+          date: String(frontMatter.date || ''),
+          url: String(frontMatter.url || `/${slug}`),
+          tags: parseTags(frontMatter.tags),
+          category: String(frontMatter.category || ''),
+          readTime: String(frontMatter.readTime || calculateReadTime(content)),
+          titleIcon: String(frontMatter.titleIcon || ''),
+        };
+      })
+      .sort((left: Post, right: Post) => new Date(right.date).getTime() - new Date(left.date).getTime());
+  } catch (error) {
+    console.warn('[home] 读取 .site-data/posts.json 失败，首页文章列表将回退到客户端加载。', error);
+    return [];
+  }
+}
+
+function parseTags(tagsValue: unknown): string[] {
+  if (Array.isArray(tagsValue)) {
+    return tagsValue.map(String).map((tag) => tag.trim()).filter(Boolean);
+  }
+
+  if (!tagsValue) {
+    return [];
+  }
+
+  return String(tagsValue)
+    .replace(/[\[\]'"]/g, '')
+    .split(/[、,，]/)
+    .map((tag) => tag.trim())
+    .filter(Boolean);
+}
+
+function extractDescription(content: string): string {
+  const plainText = content
+    .replace(/---[\s\S]*?---/, '')
+    .replace(/#+ /g, '')
+    .replace(/\*\*/g, '')
+    .replace(/\*/g, '')
+    .replace(/`/g, '')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/\n/g, ' ')
+    .trim();
+
+  return plainText.length > 150 ? `${plainText.slice(0, 150)}...` : plainText;
+}
+
+function calculateReadTime(content: string): string {
+  const contentWithoutFrontmatter = content.replace(/---[\s\S]*?---/, '');
+  const chineseChars = (contentWithoutFrontmatter.match(/[\u4e00-\u9fa5]/g) || []).length;
+  const englishWords = (contentWithoutFrontmatter.match(/[a-zA-Z]+/g) || []).length;
+  const minutes = Math.max(1, Math.ceil((chineseChars + englishWords) / 300));
+  return `${minutes} 分钟`;
+}
 ---
 
 <Layout seo={seo}>
@@ -34,7 +114,7 @@ const seo = createPageSeo({
     <!-- 📄 内容区域 -->
     <div class="home-content-section" id="content">
       <!-- 🏠 双栏内容布局 -->
-      <HomeContent client:load="vue" categories={docData.categories} tags={docData.tags} />
+      <HomeContent client:load="vue" categories={docData.categories} tags={docData.tags} initialPosts={initialPosts} />
     </div>
   </div>
 </Layout>
