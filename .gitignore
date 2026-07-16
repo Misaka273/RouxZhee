@@ -66,6 +66,5 @@ pagefind/
 # 注意：如果你需要推送配置到自己的仓库，请注释掉下面这行
 # src/config/.config/
 
-/.开发文档
-/.trae/
+# 开发待办文档
 /.shiroki/

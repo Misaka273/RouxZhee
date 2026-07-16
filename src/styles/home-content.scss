@@ -49,6 +49,7 @@
       text-align: center;
 
       .load-more-btn {
+        position: relative;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -62,10 +63,41 @@
         cursor: pointer;
         transition: all var(--transition-normal);
         box-shadow: var(--load-more-shadow);
+        overflow: hidden;
+
+        .btn-text {
+          display: inline-block;
+          transition:
+            transform 0.3s ease,
+            opacity 0.3s ease;
+        }
+
+        .btn-text-hover {
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 0;
+          bottom: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transform: translateX(100%);
+          opacity: 0;
+        }
 
         &:hover:not(:disabled) {
           transform: var(--load-more-transform-hover);
           box-shadow: var(--load-more-shadow-hover);
+
+          .btn-text-default {
+            transform: translateX(-100%);
+            opacity: 0;
+          }
+
+          .btn-text-hover {
+            transform: translateX(0);
+            opacity: 1;
+          }
         }
 
         &:disabled {
