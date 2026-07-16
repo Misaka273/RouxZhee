@@ -188,6 +188,15 @@
     padding-right: 12px;
   }
 
+  .toc-highlight-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px;
+    background: rgba(14, 116, 144, 0.08);
+    border-radius: 8px;
+  }
+
   .toc-link {
     display: block;
     padding: 6px 10px;
@@ -205,9 +214,10 @@
       background: rgba(14, 116, 144, 0.1);
     }
 
-    &.active {
+    &.is-active {
       color: var(--primary-color);
       background: rgba(14, 116, 144, 0.15);
+      font-weight: 600;
     }
   }
 
@@ -1359,6 +1369,10 @@
       border-color: rgba(255, 255, 255, 0.1);
     }
 
+    .toc-highlight-group {
+      background: rgba(34, 211, 238, 0.08);
+    }
+
     .toc-link {
       color: var(--text-secondary);
 
@@ -1367,9 +1381,10 @@
         background: rgba(34, 211, 238, 0.1);
       }
 
-      &.active {
+      &.is-active {
         color: var(--primary-color);
         background: rgba(34, 211, 238, 0.15);
+        font-weight: 600;
       }
     }
   }

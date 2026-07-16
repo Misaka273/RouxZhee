@@ -8,22 +8,50 @@
   <div class="team-page-wrapper">
     <main class="team-page">
       <!-- 品牌信息 -->
-      <section class="team-brand-section card-with-decoration">
-        <div class="brand-left">
-          <div class="brand-logo-wrapper">
-            <img
-              :src="config.brand.logo"
-              :alt="config.brand.name"
-              class="brand-logo"
-              loading="eager"
-            />
+      <div class="brand-section-wrapper">
+        <div class="brand-decorations" aria-hidden="true">
+          <img
+            class="brand-deco brand-deco-top"
+            src="http://mu.baimu.live/img/ico/image-star.png"
+            alt=""
+            loading="lazy"
+          />
+          <img
+            class="brand-deco brand-deco-left"
+            src="http://mu.baimu.live/img/ico/image-free.png"
+            alt=""
+            loading="lazy"
+          />
+          <img
+            class="brand-deco brand-deco-right-top"
+            src="http://mu.baimu.live/img/ico/image-light.png"
+            alt=""
+            loading="lazy"
+          />
+          <img
+            class="brand-deco brand-deco-right-bottom"
+            src="http://mu.baimu.live/img/ico/image-like.png"
+            alt=""
+            loading="lazy"
+          />
+        </div>
+        <section class="team-brand-section card-with-decoration">
+          <div class="brand-left">
+            <div class="brand-logo-wrapper">
+              <img
+                :src="config.brand.logo"
+                :alt="config.brand.name"
+                class="brand-logo"
+                loading="eager"
+              />
+            </div>
           </div>
-        </div>
-        <div class="brand-right">
-          <h1 class="brand-name">{{ config.brand.name }}</h1>
-          <p class="brand-short-name">品牌简称 {{ config.brand.shortName }}</p>
-        </div>
-      </section>
+          <div class="brand-right">
+            <h1 class="brand-name">{{ config.brand.name }}</h1>
+            <p class="brand-short-name">品牌简称 {{ config.brand.shortName }}</p>
+          </div>
+        </section>
+      </div>
 
       <!-- 品牌含义 -->
       <section class="team-meaning-section">
@@ -100,7 +128,7 @@
       <!-- 团队成员 + 投喂支持 -->
       <div class="team-bottom-section">
         <section class="team-members-section">
-          <h2 class="section-title">👥 团队成员</h2>
+          <SectionTitle subtitle="TEAM MEMBERS" title="团队成员" />
           <div class="members-grid">
             <component
               :is="member.link ? 'a' : 'div'"
@@ -131,7 +159,7 @@
         </section>
 
         <section class="team-sponsor-section">
-          <h2 class="section-title">☕ 投喂支持</h2>
+          <SectionTitle subtitle="SPONSOR" title="投喂支持" />
           <div class="sponsor-amounts">
             <button
               v-for="(amount, index) in config.sponsor.amounts"
@@ -158,7 +186,7 @@
 
       <!-- RouxZhee 主题 -->
       <section class="team-themes-section">
-        <h2 class="section-title">🎨 RouxZhee 主题</h2>
+        <SectionTitle subtitle="THEMES" title="RouxZhee 主题" />
         <div class="themes-grid">
           <a
             v-for="(theme, index) in themes"
@@ -201,7 +229,7 @@
 
       <!-- RouxZhee 插件 -->
       <section class="team-plugins-section">
-        <h2 class="section-title">🔌 RouxZhee 插件</h2>
+        <SectionTitle subtitle="PLUGINS" title="RouxZhee 插件" />
         <div class="plugins-grid">
           <a
             v-for="(plugin, index) in plugins"
@@ -275,6 +303,7 @@
 
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import type { TeamConfig } from '../types/team';
+import SectionTitle from './SectionTitle.vue';
 
 interface Props {
   config: TeamConfig;

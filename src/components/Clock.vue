@@ -77,16 +77,16 @@ onUnmounted(() => {
   align-items: center;
   font-family: var(--rouxzhee-font-family-mono, 'Monaco', 'Menlo', 'Consolas', monospace);
 
-  // 📦 透明容器框，固定宽度防止跳动
+  // 📦 容器框，固定宽度防止跳动
   .clock-container {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    width: 90px; // 固定宽度，避免数字变化导致布局跳动
-    height: 36px; // 固定高度
-    padding: 0 12px;
-    border-radius: 8px;
-    background-color: transparent; // 完全透明背景
+    width: 100px; // 固定宽度，避免数字变化导致布局跳动
+    height: 40px; // 固定高度
+    padding: 0 16px;
+    border-radius: 12px;
+    background-color: rgba(14, 116, 144, 0.12); // 主题色半透明背景
     justify-content: center;
     flex-shrink: 0; // 防止容器被压缩
   }

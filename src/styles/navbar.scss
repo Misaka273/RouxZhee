@@ -120,10 +120,9 @@
       text-shadow: var(--navbar-glow-shadow);
     }
 
-    // ⏰ 时钟文字颜色 + 粉色发光阴影
+    // ⏰ 时钟文字颜色
     .navbar-clock {
       color: var(--navbar-glow-text);
-      text-shadow: var(--navbar-glow-shadow);
     }
 
     // 🔗 社交链接图标颜色
@@ -197,7 +196,6 @@
     // ⏰ 滚动后时钟文字颜色
     .navbar-clock {
       color: var(--navbar-text);
-      text-shadow: var(--navbar-text-shadow-sm);
     }
 
     // 🔗 滚动后社交链接图标颜色

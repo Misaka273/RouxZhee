@@ -373,13 +373,13 @@ onUnmounted(() => {
 // 🎨 波浪颜色变量
 :deep(.banner-waves) {
   .wave-layer:nth-child(1) {
-    fill: rgba(255, 255, 255, 0.7) !important;
+    fill: var(--wave-color-1);
   }
   .wave-layer:nth-child(2) {
-    fill: rgba(255, 255, 255, 0.5) !important;
+    fill: var(--wave-color-2);
   }
   .wave-layer:nth-child(3) {
-    fill: rgba(255, 255, 255, 0.3) !important;
+    fill: var(--wave-color-3);
   }
 }
 </style>

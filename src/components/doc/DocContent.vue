@@ -26,8 +26,20 @@
       <div class="sidebar-toc">
         <h4 class="toc-title">📄当前文档目录</h4>
         <nav class="toc-nav">
+          <div v-if="highlightCount > 0" class="toc-highlight-group">
+            <a
+              v-for="item in toc.slice(0, highlightCount)"
+              :key="item.id"
+              :href="`#${item.id}`"
+              class="toc-link"
+              :class="[`toc-level-${item.level}`, { 'is-active': item.id === activeTocId }]"
+              @click.prevent="scrollToAnchor(item.id)"
+            >
+              {{ item.text }}
+            </a>
+          </div>
           <a
-            v-for="item in toc"
+            v-for="item in toc.slice(highlightCount)"
             :key="item.id"
             :href="`#${item.id}`"
             class="toc-link"
@@ -264,8 +276,38 @@ const scrollToAnchor = (id: string) => {
   }
 };
 
+/* 🎯 根据滚动位置更新目录高亮 */
+const updateTocHighlight = () => {
+  if (!props.toc.length) return;
+
+  const navHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-height')) || 80;
+  const offset = navHeight + 40;
+  let currentIndex = -1;
+
+  props.toc.forEach((item, index) => {
+    const el = document.getElementById(item.id);
+    if (!el) return;
+
+    const { top } = el.getBoundingClientRect();
+    if (top <= offset) {
+      currentIndex = index;
+    }
+  });
+
+  activeTocIndex.value = currentIndex;
+};
+
 /* 🎨 内容引用 */
 const contentRef = ref<HTMLElement | null>(null);
+
+/* 🎯 当前高亮的目录项索引 */
+const activeTocIndex = ref(-1);
+
+/* 🎯 已读/当前目录项数量（从起始到当前项） */
+const highlightCount = computed(() => activeTocIndex.value + 1);
+
+/* 🎯 当前激活项 ID */
+const activeTocId = computed(() => props.toc[activeTocIndex.value]?.id || '');
 
 /* 🎨 侧边栏透明度控制 */
 const isSidebarFaded = ref(false);
@@ -333,6 +375,9 @@ onMounted(() => {
 
   // 监听滚动事件，保存位置
   window.addEventListener('scroll', saveScrollPosition);
+
+  // 监听滚动事件，更新目录高亮
+  window.addEventListener('scroll', updateTocHighlight, { passive: true });
 
   // 监听页面卸载，保存位置
   window.addEventListener('beforeunload', saveScrollPosition);
@@ -504,6 +549,9 @@ onMounted(() => {
         body.appendChild(lineNumbers);
         body.appendChild(block);
       });
+
+      /* 🎯 初始化目录高亮 */
+      updateTocHighlight();
     }
   });
 });
@@ -511,6 +559,7 @@ onMounted(() => {
 /* 🎯 组件卸载时清理 */
 onUnmounted(() => {
   window.removeEventListener('scroll', saveScrollPosition);
+  window.removeEventListener('scroll', updateTocHighlight);
   window.removeEventListener('beforeunload', saveScrollPosition);
   // 清除侧边栏淡出计时器
   if (sidebarFadeTimer) {

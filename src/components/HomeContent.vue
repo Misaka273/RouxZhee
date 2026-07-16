@@ -62,7 +62,8 @@
           @click="loadMore"
           :disabled="isLoading"
         >
-          {{ isLoading ? '加载中...' : '加载更多' }}
+          <span class="btn-text btn-text-default">{{ isLoading ? '加载中...' : '加载更多' }}</span>
+          <span class="btn-text btn-text-hover">点击加载</span>
         </button>
         <p v-else class="no-more-posts">已经到底啦 ~</p>
       </div>
