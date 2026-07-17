@@ -93,17 +93,11 @@
     height: 80px;
     width: 100%;
     margin: 0;
-    // 与 Banner 背景色契合的半透明高斯模糊
-    background: linear-gradient(
-      135deg,
-      var(--navbar-transparent-bg-start) 0%,
-      var(--navbar-transparent-bg-end) 100%
-    );
-    backdrop-filter: blur(var(--navbar-transparent-blur)) saturate(var(--navbar-transparent-saturate));
-    -webkit-backdrop-filter: blur(var(--navbar-transparent-blur)) saturate(var(--navbar-transparent-saturate));
-    box-shadow:
-      var(--navbar-shadow-sm),
-      var(--navbar-inset-highlight);
+    // 🫧 页面顶部：容器完全透明，去掉高斯模糊背景，让 Banner 完整透出
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: none;
     border: none;
     border-radius: 0;
 
@@ -128,6 +122,11 @@
     // 🔗 社交链接图标颜色
     .social-link .social-icon {
       color: var(--navbar-text);
+    }
+
+    // ➕ 「更多」按钮图标颜色（与链接一致使用发光白）
+    .navbar-more-btn {
+      color: var(--navbar-glow-text);
     }
 
     // Logo 保持原色
@@ -180,12 +179,21 @@
       text-shadow: var(--navbar-text-shadow-sm);
     }
 
+    // 💊 滚动后：胶囊切换为浅色卡片内的深色半透明风格
+    .navbar-menu {
+      background: var(--navbar-capsule-bg-scrolled);
+      border-color: var(--navbar-capsule-border-scrolled);
+    }
+
+    .nav-capsule-highlight {
+      background: var(--navbar-capsule-highlight-scrolled);
+    }
+
     .navbar-link {
       color: var(--navbar-text-secondary);
 
       &:hover {
         color: var(--navbar-text-hover);
-        background-color: var(--navbar-link-active-bg);
       }
 
       &.is-active {
@@ -203,6 +211,15 @@
       color: var(--navbar-text);
     }
 
+    // ➕ 滚动后「更多」按钮图标颜色
+    .navbar-more-btn {
+      color: var(--navbar-text);
+
+      &.is-active {
+        background-color: var(--navbar-capsule-highlight-scrolled);
+      }
+    }
+
     // 移动端菜单按钮
     .navbar-toggle .toggle-line {
       background-color: var(--navbar-text);
@@ -214,8 +231,9 @@
 // 📦 导航栏容器
 // ========================================
 .navbar-container {
+  position: relative;
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   height: 100%;
   width: 1940px;
@@ -276,21 +294,63 @@
 // ========================================
 // 📍 导航链接菜单
 // ========================================
-.navbar-menu {
+// ========================================
+// 🔗 右侧整体区域（导航菜单 + 社交链接 + 时钟）
+// ========================================
+.navbar-end {
+  grid-column: 3;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  justify-self: center;
+  gap: 16px;
 
   @media (max-width: 768px) {
     display: none;
   }
 }
 
+// 💊 胶囊菜单容器（复刻 NavCapsule 桌面胶囊风格）
+.navbar-menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 9999px;
+  // 顶部状态：悬浮于 Banner 之上的白色半透明胶囊
+  background: var(--navbar-capsule-bg);
+  border: 1px solid var(--navbar-capsule-border);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  transition:
+    background 0.4s ease,
+    border-color 0.4s ease;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+// 💊 滑动高亮胶囊（跟随鼠标在菜单项间滑动）
+.nav-capsule-highlight {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  border-radius: 9999px;
+  background: var(--navbar-capsule-highlight);
+  transition:
+    left 0.3s ease-out,
+    width 0.3s ease-out,
+    opacity 0.3s ease-out,
+    background 0.4s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
 // 📝 导航菜单项（包含子菜单的容器）
 .navbar-menu-item {
   position: relative;
+  z-index: 1; // ◀️ 位于滑动高亮胶囊之上
   display: flex;
   align-items: center;
 
@@ -325,50 +385,20 @@
 
 .navbar-link {
   position: relative;
-  padding: 8px 16px;
+  z-index: 1; // ◀️ 位于滑动高亮胶囊之上
+  padding: 7px 16px;
   font-size: 0.95rem;
   font-weight: 500;
   text-decoration: none;
-  border-radius: 8px;
+  border-radius: 9999px;
   pointer-events: auto;
-  transition:
-    color 0.3s ease,
-    background-color 0.3s ease;
-
-  &:hover {
-    // 💜 半透明紫色背景
-    background-color: var(--navbar-link-hover-bg);
-  }
-
-  // 下划线动画
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: 4px;
-    left: 50%;
-    width: 0;
-    height: 2px;
-    background: var(--gradient-primary);
-    border-radius: 2px;
-    transition:
-      width 0.3s ease,
-      left 0.3s ease;
-  }
-
-  &:hover::after {
-    width: 60%;
-    left: 20%;
-  }
+  transition: color 0.3s ease;
 
   // 📂 子菜单切换按钮样式
   &.submenu-toggle {
     display: flex;
     align-items: center;
     gap: 4px;
-
-    &::after {
-      display: none;
-    }
 
     .submenu-arrow {
       font-size: 0.7rem;
@@ -379,6 +409,42 @@
         transform: rotate(90deg);
       }
     }
+  }
+}
+
+// ========================================
+// ➕ 桌面端「更多」菜单按钮
+// ========================================
+.navbar-more-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 16px; // ◀️ 与导航链接相同的留白，滑动高亮宽度一致
+  color: var(--navbar-text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: 9999px; // ◀️ 与胶囊菜单造型统一
+  cursor: pointer;
+  transition:
+    color 0.25s ease,
+    background-color 0.25s ease,
+    transform 0.2s ease,
+    box-shadow 0.25s ease;
+
+  // 💊 hover 交给胶囊滑动高亮（与前三个导航项一致），仅保留展开态指示
+  &.is-active {
+    color: var(--navbar-text-hover);
+    background-color: var(--navbar-capsule-highlight);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+
+  .navbar-more-icon {
+    width: 20px;
+    height: 20px;
   }
 }
 
@@ -459,6 +525,28 @@
         transform: translateY(0);
       }
     }
+
+  }
+}
+
+// 🪟 一级菜单项包含子菜单：点击打开瀑布流弹窗
+.navbar-menu-item.nav-popup {
+  .navbar-link.nav-popup-toggle {
+    .submenu-arrow {
+      // 默认向下箭头，表示点击向下展开弹窗
+      transform: rotate(90deg);
+
+      &.is-rotated {
+        transform: rotate(270deg);
+      }
+    }
+  }
+
+  &.is-active {
+    > .navbar-link {
+      color: var(--navbar-text-hover);
+      background-color: var(--navbar-capsule-highlight);
+    }
   }
 }
 
@@ -488,6 +576,300 @@
 }
 
 // ========================================
+// 🖥️ 桌面端「更多」菜单弹窗
+// ========================================
+.more-menu-enter-active,
+.more-menu-leave-active {
+  transition: opacity 0.3s ease;
+
+  .navbar-more-panel {
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+  }
+}
+
+.more-menu-enter-from,
+.more-menu-leave-to {
+  opacity: 0;
+
+  .navbar-more-panel {
+    opacity: 0;
+    transform: scale(0.96) translateY(-8px);
+  }
+}
+
+.navbar-more-menu {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--nav-z-index, 3) + 20);
+  pointer-events: none;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.navbar-more-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--search-overlay-bg);
+  backdrop-filter: blur(var(--search-overlay-blur));
+  -webkit-backdrop-filter: blur(var(--search-overlay-blur));
+  pointer-events: auto;
+  transition: opacity 0.3s ease;
+}
+
+// 🖥️ 桌面端二级菜单瀑布流弹窗（三级及以上菜单）
+.navbar-nav-popup {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--nav-z-index, 3) + 25);
+  pointer-events: none;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.navbar-nav-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: transparent;
+  pointer-events: auto;
+  transition: opacity 0.3s ease;
+}
+
+.navbar-nav-popup-panel {
+  pointer-events: auto;
+  // 覆盖更多面板的默认定位，由 JS 动态计算
+  right: auto;
+  top: auto;
+  max-height: calc(100vh - 120px);
+  transform-origin: top center;
+}
+
+.navbar-more-panel {
+  position: fixed;
+  top: 90px;
+  right: 16px;
+  width: min(520px, calc(100vw - 32px));
+  min-width: 220px;
+  max-height: calc(100vh - 104px);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  background: var(--search-modal-bg);
+  border: 1px solid var(--search-modal-border);
+  border-radius: var(--card-border-radius);
+  box-shadow: var(--search-modal-shadow);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  pointer-events: auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  transform-origin: top right;
+  // 🙈 隐藏滚动条但保留滚动功能
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  // 📐 根据内容列数自适应弹窗宽度
+  &.cols-1 {
+    width: min(240px, calc(100vw - 32px));
+  }
+
+  &.cols-2 {
+    width: min(380px, calc(100vw - 32px));
+  }
+
+  &.cols-3 {
+    width: min(520px, calc(100vw - 32px));
+  }
+
+  @media (max-width: 768px) {
+    width: calc(100% - 32px);
+    min-width: unset;
+    left: 16px;
+    right: 16px;
+    transform-origin: top center;
+  }
+}
+
+.navbar-more-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.navbar-more-title {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.navbar-more-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover {
+    background-color: var(--navbar-link-active-bg);
+    color: var(--primary-color);
+  }
+}
+
+// 瀑布流容器：根据内容动态列数
+.navbar-more-waterfall {
+  columns: 3;
+  column-gap: 12px;
+
+  // 动态列数类
+  &.cols-1 {
+    columns: 1;
+  }
+
+  &.cols-2 {
+    columns: 2;
+  }
+
+  &.cols-3 {
+    columns: 3;
+  }
+
+  @media (max-width: 520px) {
+    columns: 2 !important;
+  }
+
+  @media (max-width: 360px) {
+    columns: 1 !important;
+  }
+}
+
+// 更多菜单卡片
+.navbar-more-card {
+  display: block;
+  break-inside: avoid;
+  margin-bottom: 12px;
+  padding: 12px;
+  text-decoration: none;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--card-border-radius);
+  transition:
+    background-color 0.25s ease,
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--navbar-link-active-bg);
+    transform: translateY(-3px);
+    box-shadow: var(--card-shadow-hover);
+  }
+
+  &.has-children {
+    cursor: default;
+
+    &:hover {
+      transform: none;
+      box-shadow: none;
+      background-color: var(--navbar-link-active-bg);
+    }
+  }
+}
+
+.navbar-more-card-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-color);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.navbar-more-parent {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-bottom: 8px;
+  word-break: break-word;
+}
+
+.navbar-more-children {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 0.5em;
+
+  // 左侧半透明虚线
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 1px;
+    border-left: 1px dashed var(--text-secondary);
+    opacity: 0.35;
+  }
+}
+
+.navbar-more-child {
+  position: relative;
+  display: block;
+  padding: 6px 8px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: 8px;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+
+  &:hover {
+    background-color: var(--navbar-link-hover-bg);
+    color: var(--primary-color);
+  }
+
+  // 短虚线横杠连接父级虚线
+  &::before {
+    content: '';
+    position: absolute;
+    left: -0.5em;
+    top: 50%;
+    width: 0.5em;
+    height: 1px;
+    border-top: 1px dashed var(--text-secondary);
+    opacity: 0.35;
+  }
+}
+
+// ========================================
 // ⏰ 时钟区域
 // ========================================
 .navbar-clock {
@@ -502,7 +884,6 @@
 .navbar-right {
   display: flex;
   align-items: center;
-  justify-self: end;
   gap: 8px;
 
   @media (max-width: 768px) {
