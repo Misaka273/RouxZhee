@@ -12,25 +12,25 @@
         <div class="brand-decorations" aria-hidden="true">
           <img
             class="brand-deco brand-deco-top"
-            src="http://mu.baimu.live/img/ico/image-star.png"
+            src="https://rz-icon.xxdevops.cn/icons/image-star.png"
             alt=""
             loading="lazy"
           />
           <img
             class="brand-deco brand-deco-left"
-            src="http://mu.baimu.live/img/ico/image-free.png"
+            src="https://rz-icon.xxdevops.cn/icons/image-free.png"
             alt=""
             loading="lazy"
           />
           <img
             class="brand-deco brand-deco-right-top"
-            src="http://mu.baimu.live/img/ico/image-light.png"
+            src="https://rz-icon.xxdevops.cn/icons/image-light.png"
             alt=""
             loading="lazy"
           />
           <img
             class="brand-deco brand-deco-right-bottom"
-            src="http://mu.baimu.live/img/ico/image-like.png"
+            src="https://rz-icon.xxdevops.cn/icons/image-like.png"
             alt=""
             loading="lazy"
           />
