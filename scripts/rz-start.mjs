@@ -21,7 +21,8 @@ const isWindows = process.platform === 'win32';
 const cacheDir = path.resolve(projectRoot, process.env.ROUXZHEE_TOOLS_CACHE_DIR || '.rouxzhee-tools');
 const binDir = path.join(cacheDir, 'bin');
 const installedToolPath = path.join(binDir, isWindows ? 'rz-tools.exe' : 'rz-tools');
-const defaultManifestURL = 'https://rouxzhee-tools-download-310ep5kp.edgeone.cool/list';
+const installInfoPath = path.join(cacheDir, 'install.json');
+const defaultManifestURL = 'https://rz-download.xxdevops.cn/list';
 
 const mode = process.argv[2] || 'dev';
 const forwardedArgs = trimSeparator(process.argv.slice(3));
@@ -52,16 +53,31 @@ async function ensureRzTools() {
     return binaryPath;
   }
 
-  if (process.env.ROUXZHEE_TOOLS_FORCE_DOWNLOAD !== '1' && existsSync(installedToolPath)) {
+  const forceDownload = process.env.ROUXZHEE_TOOLS_FORCE_DOWNLOAD === '1';
+  const localBinary = findLocalDevelopmentBinary();
+
+  if (!forceDownload && localBinary) {
+    const isCurrent = await isLocalBinaryCurrent(localBinary);
+    if (!isCurrent) {
+      await installLocalBinary(localBinary);
+      log(`Installed local rz-tools from ${path.relative(projectRoot, localBinary)}`);
+    } else {
+      log(`Using current local rz-tools: ${path.relative(projectRoot, installedToolPath)}`);
+    }
     await assertExecutable(installedToolPath);
-    log(`Using cached rz-tools: ${path.relative(projectRoot, installedToolPath)}`);
     return installedToolPath;
   }
 
-  const localBinary = findLocalDevelopmentBinary();
-  if (localBinary && process.env.ROUXZHEE_TOOLS_FORCE_DOWNLOAD !== '1') {
-    await installLocalBinary(localBinary);
-    log(`Installed local rz-tools from ${path.relative(projectRoot, localBinary)}`);
+  if (!forceDownload && existsSync(installedToolPath)) {
+    await assertExecutable(installedToolPath);
+    const update = await checkRemoteUpdateForCachedTools();
+    if (!update.shouldUpdate) {
+      log(`Using cached rz-tools: ${path.relative(projectRoot, installedToolPath)}`);
+      return installedToolPath;
+    }
+    log(update.reason);
+    await downloadRzTools(update.remote);
+    await assertExecutable(installedToolPath);
     return installedToolPath;
   }
 
@@ -81,6 +97,7 @@ async function installLocalBinary(sourcePath) {
     `${JSON.stringify({
       source: 'local',
       sourcePath,
+      sourceSha256: await sha256File(sourcePath),
       installedAt: new Date().toISOString(),
       platform: process.platform,
       arch: process.arch,
@@ -88,17 +105,9 @@ async function installLocalBinary(sourcePath) {
   );
 }
 
-async function downloadRzTools() {
-  const manifestURL =
-    process.env.ROUXZHEE_TOOLS_MANIFEST_URL ||
-    process.env.ROUXZHEE_TOOLS_LIST_URL ||
-    process.env.RZ_TOOLS_MANIFEST_URL ||
-    defaultManifestURL;
-
-  log(`Fetching rz-tools manifest: ${redactURL(manifestURL)}`);
-  const manifest = await fetchJSON(manifestURL);
-  const toolInfo = manifest['rouxzhee-tools'] || manifest['rz-tools'] || manifest;
-  const selection = selectDownload(toolInfo);
+async function downloadRzTools(remote) {
+  const resolved = remote || await resolveRemoteDownload();
+  const { manifestURL, toolInfo, selection } = resolved;
   const archivePath = path.join(cacheDir, 'download', selection.fileName);
 
   await rm(path.dirname(archivePath), { recursive: true, force: true });
@@ -127,18 +136,125 @@ async function downloadRzTools() {
   }
 
   await writeFile(
-    path.join(cacheDir, 'install.json'),
+    installInfoPath,
     `${JSON.stringify({
-      source: 'remote',
-      manifestURL: redactURL(manifestURL),
-      downloadURL: redactURL(selection.url),
-      platform: process.platform,
-      arch: process.arch,
-      version: toolInfo.version || '',
+      ...remoteInstallInfo(resolved),
       installedAt: new Date().toISOString(),
     }, null, 2)}\n`,
   );
   log(`Installed rz-tools to ${path.relative(projectRoot, installedToolPath)}`);
+}
+
+async function resolveRemoteDownload() {
+  const manifestURL =
+    process.env.ROUXZHEE_TOOLS_MANIFEST_URL ||
+    process.env.ROUXZHEE_TOOLS_LIST_URL ||
+    process.env.RZ_TOOLS_MANIFEST_URL ||
+    defaultManifestURL;
+
+  log(`Fetching rz-tools manifest: ${redactURL(manifestURL)}`);
+  const manifest = await fetchJSON(manifestURL);
+  const toolInfo = manifest['rouxzhee-tools'] || manifest['rz-tools'] || manifest;
+  const selection = selectDownload(toolInfo);
+  return { manifestURL, toolInfo, selection };
+}
+
+async function checkRemoteUpdateForCachedTools() {
+  if (process.env.ROUXZHEE_TOOLS_SKIP_UPDATE_CHECK === '1') {
+    return { shouldUpdate: false };
+  }
+
+  const installInfo = await readInstallInfo();
+  if (!installInfo || installInfo.source !== 'remote') {
+    try {
+      return {
+        shouldUpdate: true,
+        remote: await resolveRemoteDownload(),
+        reason: 'Cached rz-tools has no remote install metadata; refreshing from manifest.',
+      };
+    } catch (error) {
+      log(`Failed to check rz-tools update, using cached binary: ${error?.message || String(error)}`);
+      return { shouldUpdate: false };
+    }
+  }
+
+  try {
+    const remote = await resolveRemoteDownload();
+    if (isSameRemoteInstall(installInfo, remote)) {
+      return { shouldUpdate: false };
+    }
+    return {
+      shouldUpdate: true,
+      remote,
+      reason: `Updating rz-tools ${formatVersion(installInfo.version)} -> ${formatVersion(remote.toolInfo.version)}.`,
+    };
+  } catch (error) {
+    log(`Failed to check rz-tools update, using cached binary: ${error?.message || String(error)}`);
+    return { shouldUpdate: false };
+  }
+}
+
+async function isLocalBinaryCurrent(sourcePath) {
+  if (!existsSync(installedToolPath)) {
+    return false;
+  }
+  await assertExecutable(installedToolPath);
+  const [sourceSha256, installedSha256, installInfo] = await Promise.all([
+    sha256File(sourcePath),
+    sha256File(installedToolPath),
+    readInstallInfo(),
+  ]);
+  return (
+    sourceSha256 === installedSha256 &&
+    installInfo?.source === 'local' &&
+    path.resolve(installInfo.sourcePath || '') === path.resolve(sourcePath)
+  );
+}
+
+function isSameRemoteInstall(installInfo, remote) {
+  const expected = remoteInstallInfo(remote);
+  return (
+    installInfo.source === expected.source &&
+    installInfo.manifestURL === expected.manifestURL &&
+    installInfo.downloadURL === expected.downloadURL &&
+    installInfo.platform === expected.platform &&
+    installInfo.arch === expected.arch &&
+    installInfo.version === expected.version &&
+    installInfo.sha256 === expected.sha256
+  );
+}
+
+function remoteInstallInfo({ manifestURL, toolInfo, selection }) {
+  return {
+    source: 'remote',
+    manifestURL: redactURL(manifestURL),
+    downloadURL: redactURL(selection.url),
+    platform: process.platform,
+    arch: process.arch,
+    version: toolInfo.version || '',
+    label: selection.label,
+    fileName: selection.fileName,
+    sha256: selection.sha256 || '',
+  };
+}
+
+async function readInstallInfo() {
+  if (!existsSync(installInfoPath)) {
+    return null;
+  }
+  try {
+    return JSON.parse(await readFile(installInfoPath, 'utf-8'));
+  } catch {
+    return null;
+  }
+}
+
+async function sha256File(filePath) {
+  return createHash('sha256').update(await readFile(filePath)).digest('hex');
+}
+
+function formatVersion(version) {
+  return version ? `v${version}` : '(unknown version)';
 }
 
 function selectDownload(toolInfo) {
