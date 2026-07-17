@@ -25,106 +25,113 @@
     </button>
 
     <!-- 📦 半屏抽屉 -->
-    <Teleport to="body">
-      <Transition name="footer-drawer">
+    <Transition name="footer-drawer">
+      <div
+        v-if="isOpen"
+        id="footer-drawer"
+        class="footer-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="footer-drawer-title"
+      >
+        <!-- 🌫️ 遮罩层 -->
         <div
-          v-if="isOpen"
-          id="footer-drawer"
-          class="footer-drawer"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="footer-drawer-title"
-        >
-          <!-- 🌫️ 遮罩层 -->
-          <div
-            class="footer-drawer-backdrop"
-            role="presentation"
+          class="footer-drawer-backdrop"
+          role="presentation"
+          @click="close"
+        />
+
+        <!-- 📄 抽屉内容 -->
+        <div class="footer-drawer-panel">
+          <!-- ✖️ 关闭按钮 -->
+          <button
+            class="footer-drawer-close"
+            type="button"
+            aria-label="关闭页脚信息"
             @click="close"
-          />
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 6 6 18"/>
+              <path d="m6 6 12 12"/>
+            </svg>
+          </button>
 
-          <!-- 📄 抽屉内容 -->
-          <div class="footer-drawer-panel">
-            <!-- ✖️ 关闭按钮 -->
-            <button
-              class="footer-drawer-close"
-              type="button"
-              aria-label="关闭页脚信息"
-              @click="close"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M18 6 6 18"/>
-                <path d="m6 6 12 12"/>
-              </svg>
-            </button>
-
-            <!-- 🧾 内容区 -->
-            <div class="footer-drawer-content">
-              <div class="footer-drawer-content-inner">
+          <!-- 🧾 内容区 -->
+          <div class="footer-drawer-content">
+            <div class="footer-drawer-content-inner">
+              <div class="footer-drawer-header">
                 <h2 id="footer-drawer-title" class="footer-drawer-title">关于站点</h2>
+                <span class="footer-theme-badge" aria-label="当前主题版本">
+                  <span class="theme-badge-icon" aria-hidden="true">📦</span>
+                  <span class="theme-badge-name">{{ siteOverviewConfig.theme.name }}</span>
+                  <span class="theme-badge-divider" aria-hidden="true">|</span>
+                  <span class="theme-badge-icon" aria-hidden="true">🎉</span>
+                  <span class="theme-badge-version">{{ siteOverviewConfig.theme.version }}</span>
+                </span>
+              </div>
 
-                <!-- 🏠 站点信息 -->
-                <div class="footer-site-info">
-                  <img
-                    v-if="navbarConfig.logo.showLogo"
-                    :src="navbarConfig.logo.src"
-                    :alt="navbarConfig.logo.siteName"
-                    class="footer-site-logo"
-                  />
-                  <div class="footer-site-meta">
-                    <h3 class="footer-site-name">{{ navbarConfig.logo.siteName }}</h3>
-                    <p class="footer-site-desc">{{ seoConfig.defaultDescription }}</p>
-                  </div>
+              <!-- 🏠 站点信息 -->
+              <div class="footer-site-info">
+                <img
+                  v-if="navbarConfig.logo.showLogo"
+                  :src="navbarConfig.logo.src"
+                  :alt="navbarConfig.logo.siteName"
+                  class="footer-site-logo"
+                />
+                <div class="footer-site-meta">
+                  <h3 class="footer-site-name">{{ navbarConfig.logo.siteName }}</h3>
+                  <p class="footer-site-desc">{{ seoConfig.defaultDescription }}</p>
                 </div>
+              </div>
 
-                <!-- ⏱️ 站点运行时间 -->
-                <div v-if="runtimeConfig.enabled" class="footer-drawer-section">
-                  <h3 class="footer-drawer-section-title">运行时间</h3>
-                  <Runtime />
-                </div>
+              <!-- ⏱️ 站点运行时间 -->
+              <div v-if="runtimeConfig.enabled" class="footer-drawer-section">
+                <h3 class="footer-drawer-section-title">运行时间</h3>
+                <Runtime />
+              </div>
 
-                <!-- 🏅 备案勋章卡片 -->
-                <div v-if="hasBeian" class="footer-beian-badges">
-                  <a
-                    v-if="bloggerConfig.beian.icp?.text"
-                    :href="bloggerConfig.beian.icp.href"
-                    class="footer-beian-badge"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="ICP备案信息"
-                  >
-                    <span class="beian-badge-icon" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                        <path d="m9 12 2 2 4-4" />
-                      </svg>
-                    </span>
-                    <span class="beian-badge-text">{{ bloggerConfig.beian.icp.text }}</span>
-                  </a>
+              <!-- 🏅 备案勋章卡片 -->
+              <div v-if="hasBeian" class="footer-beian-badges">
+                <a
+                  v-if="bloggerConfig.beian.icp?.text"
+                  :href="bloggerConfig.beian.icp.href"
+                  class="footer-beian-badge"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="ICP备案信息"
+                >
+                  <span class="beian-badge-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                      <path d="m9 12 2 2 4-4" />
+                    </svg>
+                  </span>
+                  <span class="beian-badge-text">{{ bloggerConfig.beian.icp.text }}</span>
+                </a>
 
-                  <a
-                    v-if="bloggerConfig.beian.gongan?.text"
-                    :href="bloggerConfig.beian.gongan.href"
-                    class="footer-beian-badge"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="公安备案信息"
-                  >
-                    <span class="beian-badge-icon" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                        <path d="M12 8v4" />
-                        <path d="M12 16h.01" />
-                      </svg>
-                    </span>
-                    <span class="beian-badge-text">{{ bloggerConfig.beian.gongan.text }}</span>
-                  </a>
-                </div>
+                <a
+                  v-if="bloggerConfig.beian.gongan?.text"
+                  :href="bloggerConfig.beian.gongan.href"
+                  class="footer-beian-badge"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="公安备案信息"
+                >
+                  <span class="beian-badge-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                      <path d="M12 8v4" />
+                      <path d="M12 16h.01" />
+                    </svg>
+                  </span>
+                  <span class="beian-badge-text">{{ bloggerConfig.beian.gongan.text }}</span>
+                </a>
               </div>
             </div>
           </div>
         </div>
-      </Transition>
-    </Teleport>
+      </div>
+    </Transition>
   </footer>
 </template>
 
@@ -135,6 +142,7 @@ import { runtimeConfig } from '../config/runtime.config';
 import { navbarConfig } from '../config/navbar.config';
 import { seoConfig } from '../config/seo.config';
 import { bloggerConfig } from '../config/blogger.config';
+import { siteOverviewConfig } from '../config/site.config';
 import { useFooterDrawer } from '../composables/useFooterDrawer';
 
 const { isOpen, open, close, toggle } = useFooterDrawer();
@@ -160,7 +168,7 @@ watch(isOpen, (open) => {
     document.body.classList.remove('footer-drawer-open');
     document.removeEventListener('keydown', handleKeyDown);
     nextTick(() => {
-      triggerRef?.focus();
+      triggerRef.value?.focus();
     });
   }
 });
@@ -325,12 +333,55 @@ defineExpose({ open, close, toggle });
   margin: 0 auto;
 }
 
+.footer-drawer-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
 .footer-drawer-title {
-  margin: 0 0 1.5rem;
+  margin: 0;
   font-family: 'xnyt', var(--font-body);
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--text-color);
+}
+
+/* 🏅 主题版号勋章 */
+.footer-theme-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  color: var(--text-white);
+  font-family: 'xnyt', var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  background: var(--gradient-primary);
+  border-radius: 9999px;
+  box-shadow: 0 4px 14px rgba(14, 116, 144, 0.35), 0 2px 6px rgba(6, 182, 212, 0.2);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(14, 116, 144, 0.45), 0 4px 10px rgba(6, 182, 212, 0.3);
+  }
+}
+
+.theme-badge-icon {
+  font-size: 0.875rem;
+}
+
+.theme-badge-divider {
+  opacity: 0.5;
+}
+
+.theme-badge-version {
+  font-weight: 600;
 }
 
 .footer-drawer-section {

@@ -71,17 +71,83 @@ const seo = resolvePageSeo(
 
   </head>
   <body>
+    <!-- 🛡️ 导航栏骨架屏：防止 Vue hydration 前布局跳动 -->
+    <div class="navbar-skeleton" id="navbar-skeleton" aria-hidden="true">
+      <div class="navbar-skeleton-container">
+        <div class="navbar-skeleton-brand">
+          <div class="navbar-skeleton-logo"></div>
+          <div class="navbar-skeleton-name"></div>
+        </div>
+        <div class="navbar-skeleton-menu">
+          <div class="navbar-skeleton-link"></div>
+          <div class="navbar-skeleton-link"></div>
+          <div class="navbar-skeleton-link"></div>
+        </div>
+        <div class="navbar-skeleton-actions">
+          <div class="navbar-skeleton-icon"></div>
+          <div class="navbar-skeleton-clock"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- 📄 页面内容 -->
     <slot />
 
     <!-- 🦶 页脚 - 运行时间等信息 -->
-    <Footer client:load="vue" />
+    <Footer client:load />
 
     <!-- 🧰 浮动工具栏 - 搜索/主题切换/回到顶部 -->
-    <FloatingToolbar client:load="vue" />
+    <FloatingToolbar client:load />
 
     <!-- 🔍 搜索弹窗 -->
-    <SearchModal client:load="vue" />
+    <SearchModal client:load />
+
+    <!-- 🛡️ 移除骨架屏 -->
+    <script is:inline>
+      (function () {
+        // 骨架屏存在期间，强制隐藏真实导航栏，避免胶囊菜单/社交链接的模糊背景闪现
+        const navbarEls = document.querySelectorAll('.navbar, .navbar-wrapper, .navbar-menu, .navbar-social, .social-link');
+        navbarEls.forEach(function (el) {
+          el.style.setProperty('opacity', '0', 'important');
+          el.style.setProperty('visibility', 'hidden', 'important');
+          el.style.setProperty('backdrop-filter', 'none', 'important');
+          el.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
+        });
+
+        function showNavbar() {
+          navbarEls.forEach(function (el) {
+            el.style.removeProperty('opacity');
+            el.style.removeProperty('visibility');
+            el.style.removeProperty('backdrop-filter');
+            el.style.removeProperty('-webkit-backdrop-filter');
+          });
+        }
+
+        function removeSkeleton() {
+          const skeleton = document.getElementById('navbar-skeleton');
+          if (skeleton) {
+            skeleton.style.opacity = '0';
+            skeleton.style.visibility = 'hidden';
+            setTimeout(function () {
+              skeleton.remove();
+              showNavbar();
+            }, 300);
+          } else {
+            showNavbar();
+          }
+        }
+        // Vue 组件挂载完成后移除骨架屏
+        if (document.readyState === 'complete') {
+          setTimeout(removeSkeleton, 100);
+        } else {
+          window.addEventListener('load', function () {
+            setTimeout(removeSkeleton, 100);
+          });
+        }
+        // 兜底：3秒后强制移除
+        setTimeout(removeSkeleton, 3000);
+      })();
+    </script>
 
     <!-- 🔄 Service Worker 注册 - 离线缓存支持 -->
     <script is:inline>
@@ -139,14 +205,96 @@ const seo = resolvePageSeo(
 
   // 确保导航栏在加载前就有基本样式
   .navbar-skeleton {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
     height: 80px;
-    background: linear-gradient(135deg, var(--navbar-transparent-bg-start) 0%, var(--navbar-transparent-bg-end) 100%);
-    backdrop-filter: blur(var(--navbar-transparent-blur));
-    z-index: var(--nav-z-index);
+    z-index: calc(var(--nav-z-index, 3) + 10);
+    background: transparent;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    pointer-events: none;
+
+    .navbar-skeleton-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 100%;
+      max-width: 1940px;
+      margin: 0 auto;
+      padding: 0 10px;
+    }
+
+    .navbar-skeleton-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 12px;
+    }
+
+    .navbar-skeleton-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: transparent;
+    }
+
+    .navbar-skeleton-name {
+      width: 100px;
+      height: 20px;
+      border-radius: 4px;
+      background: transparent;
+    }
+
+    .navbar-skeleton-menu {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px;
+      border-radius: 9999px;
+      background: transparent;
+      border: 1px solid transparent;
+    }
+
+    .navbar-skeleton-link {
+      width: 60px;
+      height: 28px;
+      border-radius: 9999px;
+      background: transparent;
+    }
+
+    .navbar-skeleton-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .navbar-skeleton-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: transparent;
+    }
+
+    .navbar-skeleton-clock {
+      width: 70px;
+      height: 24px;
+      border-radius: 4px;
+      background: transparent;
+    }
+  }
+
+  // 骨架屏存在期间隐藏真实导航栏，避免胶囊菜单/社交链接的模糊背景透出
+  .navbar-skeleton ~ * .navbar,
+  .navbar-skeleton ~ * .navbar-wrapper,
+  .navbar-skeleton ~ * .navbar-menu,
+  .navbar-skeleton ~ * .navbar-social,
+  .navbar-skeleton ~ * .social-link {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
   }
 
   // 🔤 字体定义

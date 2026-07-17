@@ -107,9 +107,10 @@ const positions = computed<{ x: number; y: number }[]>(() => {
     // 使用 0.6 次方让外圈分布更稀疏，减少完全重叠
     const r = Math.min(step * Math.pow(index, 1), maxRadius);
     const theta = index * goldenAngle;
+    // 固定 2 位小数，避免服务端与客户端浮点精度差异导致 hydration 警告
     return {
-      x: r * Math.cos(theta),
-      y: r * Math.sin(theta),
+      x: Number((r * Math.cos(theta)).toFixed(2)),
+      y: Number((r * Math.sin(theta)).toFixed(2)),
     };
   });
 });

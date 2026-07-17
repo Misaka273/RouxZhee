@@ -488,7 +488,13 @@ function trimSeparator(args) {
 
 function run(command, args, options = {}) {
   return new Promise((resolve, reject) => {
-    const child = spawn(command, args, {
+    // Node.js v24+ on Windows blocks direct spawn of .cmd/.bat with shell: false (CVE-2024-27980).
+    // Use `cmd /c` for batch files to avoid EINVAL and deprecation warnings.
+    const isBatch = isWindows && (command.endsWith('.cmd') || command.endsWith('.bat'));
+    const resolvedCommand = isBatch ? 'cmd' : command;
+    const resolvedArgs = isBatch ? ['/c', command, ...args] : args;
+
+    const child = spawn(resolvedCommand, resolvedArgs, {
       cwd: options.cwd || projectRoot,
       stdio: 'inherit',
       shell: false,

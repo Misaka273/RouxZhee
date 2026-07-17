@@ -109,12 +109,12 @@ function calculateReadTime(content: string): string {
 <Layout seo={seo}>
   <div class="home-page">
     <!-- 🎯 Banner 区域 (包含导航栏)  -->
-    <Banner client:load="vue" />
+    <Banner client:load />
 
     <!-- 📄 内容区域 -->
     <div class="home-content-section" id="content">
       <!-- 🏠 双栏内容布局 -->
-      <HomeContent client:load="vue" categories={docData.categories} tags={docData.tags} initialPosts={initialPosts} />
+      <HomeContent client:load categories={docData.categories} tags={docData.tags} initialPosts={initialPosts} />
     </div>
   </div>
 </Layout>

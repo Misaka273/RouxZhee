@@ -8,8 +8,11 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue';
 import Clock from './Clock.vue';
+import MoreIcon from './ico/MoreIcon.vue';
+import HintPill from './HintPill.vue';
 import { navbarConfig, type NavLink } from '../config/navbar.config';
 import { useFooterDrawer } from '../composables/useFooterDrawer';
+import { useHintPill } from '../composables/useHintPill';
 import type { TocItem, CategoryDoc, CategoryItem } from '../types/doc';
 
 // 💕 组件属性定义（文档页侧边栏数据）
@@ -44,6 +47,89 @@ const categoryPanelTitle = computed(() =>
 
 // 🎯 当前打开的菜单路径（用于控制多级菜单展开状态）
 const activeMenuPath = ref<string[]>([]);
+
+// 💊 胶囊菜单滑动高亮（复刻 NavCapsule：跟随鼠标在菜单项间滑动）
+const navMenuRef = ref<HTMLElement | null>(null);
+const navHighlightStyle = ref<{ left: string; width: string; opacity: string }>({
+  left: '0px',
+  width: '0px',
+  opacity: '0'
+});
+
+// 💬 状态提示胶囊
+const { show: showHint, hide: hideHint } = useHintPill();
+
+// 💊 从元素读取提示文本
+const readNavHint = (el: HTMLElement) => el.getAttribute('data-nav-hint') || '';
+
+// 💊 鼠标移入菜单项：测量位置，滑动高亮胶囊 + 状态提示
+const onNavItemEnter = (e: MouseEvent) => {
+  const el = e.currentTarget as HTMLElement;
+  const nav = navMenuRef.value;
+  if (!nav || !el) return;
+  const navRect = nav.getBoundingClientRect();
+  const elRect = el.getBoundingClientRect();
+  navHighlightStyle.value = {
+    left: `${elRect.left - navRect.left}px`,
+    width: `${elRect.width}px`,
+    opacity: '1'
+  };
+
+  showHint(readNavHint(el));
+};
+
+// 💊 鼠标移出胶囊菜单：高亮淡出 + 隐藏状态提示
+const onNavMenuLeave = () => {
+  navHighlightStyle.value = { ...navHighlightStyle.value, opacity: '0' };
+  hideHint();
+};
+
+// 🔗 鼠标移入社交链接：显示状态提示
+const onSocialItemEnter = (e: MouseEvent) => {
+  showHint(readNavHint(e.currentTarget as HTMLElement));
+};
+
+// 🔗 鼠标移出社交链接：隐藏状态提示
+const onSocialItemLeave = () => {
+  hideHint();
+};
+
+// 🎯 桌面端「更多」菜单弹窗状态
+const isMoreMenuOpen = ref(false);
+
+// 🎯 桌面端导航菜单瀑布流弹窗状态（有子菜单的一级菜单项点击后弹出）
+const activeNavPopup = ref<{ link: NavLink; triggerEl: HTMLElement } | null>(null);
+const navPopupRef = ref<HTMLElement | null>(null);
+const popupPositionTick = ref(0);
+const updatePopupPosition = () => {
+  popupPositionTick.value++;
+};
+
+// 📍 桌面端导航菜单拆分：按 collapse 字段决定展示或收纳
+const visibleLinks = computed(() => navbarConfig.links.filter((link) => !link.collapse));
+const moreLinks = computed(() => navbarConfig.links.filter((link) => link.collapse));
+const hasMoreLinks = computed(() => moreLinks.value.length > 0);
+
+// 🧮 根据「更多」菜单内容动态决定瀑布流列数
+const moreColumns = computed(() => {
+  const count = moreLinks.value.length;
+  if (count <= 1) return 1;
+  if (count <= 2) return 2;
+  if (count === 3) {
+    const hasChildren = moreLinks.value.filter((link) => link.children && link.children.length > 0).length;
+    // 1 个长卡片 + 2 个短卡片时，用 2 列让短卡片上下堆叠，避免左右空荡
+    if (hasChildren === 1) return 2;
+  }
+  return 3;
+});
+
+// 🏷️ 将「更多」菜单按高度分组：短卡片优先渲染，便于瀑布流堆叠
+const shortMoreLinks = computed(() =>
+  moreLinks.value.filter((link) => !link.children || link.children.length === 0)
+);
+const longMoreLinks = computed(() =>
+  moreLinks.value.filter((link) => link.children && link.children.length > 0)
+);
 
 // 📝 切换子菜单展开状态
 const toggleSubmenu = (path: string[], event?: Event) => {
@@ -85,13 +171,93 @@ const closeAllSubmenus = () => {
   activeMenuPath.value = [];
 };
 
-// 📝 处理点击页面其他地方关闭子菜单
+// 📝 打开/关闭「更多」菜单
+const toggleMoreMenu = () => {
+  isMoreMenuOpen.value = !isMoreMenuOpen.value;
+  if (isMoreMenuOpen.value) {
+    closeNavPopup();
+  }
+};
+
+const openMoreMenu = () => {
+  isMoreMenuOpen.value = true;
+  closeNavPopup();
+};
+
+const closeMoreMenu = () => {
+  isMoreMenuOpen.value = false;
+};
+
+// 📝 打开/关闭导航菜单瀑布流弹窗（有子菜单的一级菜单项）
+const openNavPopup = (link: NavLink, event: MouseEvent) => {
+  event.preventDefault();
+  event.stopPropagation();
+  // 基于一级菜单项（.navbar-menu-item）定位，确保弹窗居中于其下方
+  const triggerEl = (event.currentTarget as HTMLElement).closest('.navbar-menu-item') as HTMLElement;
+  if (activeNavPopup.value?.link === link) {
+    closeNavPopup();
+  } else {
+    activeNavPopup.value = { link, triggerEl };
+    closeMoreMenu();
+  }
+};
+
+const closeNavPopup = () => {
+  activeNavPopup.value = null;
+};
+
+// 🧮 导航菜单弹窗列数
+const navPopupColumns = computed(() => {
+  const children = activeNavPopup.value?.link.children || [];
+  const count = children.length;
+  if (count <= 1) return 1;
+  if (count <= 2) return 2;
+  return 3;
+});
+
+// 📍 导航菜单弹窗定位：显示在触发项中间下方
+const navPopupStyle = computed(() => {
+  // 依赖 tick，窗口大小变化时强制重新计算
+  void popupPositionTick.value;
+  if (!activeNavPopup.value) return {};
+  const rect = activeNavPopup.value.triggerEl.getBoundingClientRect();
+  const popupWidth =
+    navPopupColumns.value === 1
+      ? 240
+      : navPopupColumns.value === 2
+        ? 380
+        : 520;
+  let left = rect.left + rect.width / 2 - popupWidth / 2;
+  const padding = 16;
+  left = Math.max(padding, Math.min(left, window.innerWidth - popupWidth - padding));
+  const top = rect.bottom + 8;
+  return {
+    position: 'fixed',
+    left: `${left}px`,
+    top: `${top}px`,
+    width: `${popupWidth}px`
+  };
+});
+
+// 📝 处理点击页面其他地方关闭子菜单和「更多」弹窗
 const handleClickOutside = (event: MouseEvent) => {
   const target = event.target as HTMLElement;
   // 检查点击的是否在菜单区域内
   const isInsideMenu = target.closest('.navbar-menu-item') !== null;
   if (!isInsideMenu) {
     closeAllSubmenus();
+  }
+  // 检查点击的是否在「更多」菜单区域内（或更多按钮本身）
+  const isInsideMoreMenu = target.closest('.navbar-more-menu') !== null;
+  const isMoreBtn = target.closest('.navbar-more-btn') !== null;
+  if (!isInsideMoreMenu && !isMoreBtn && isMoreMenuOpen.value) {
+    closeMoreMenu();
+  }
+  // 检查点击的是否在导航菜单弹窗区域内
+  const isInsideNavPopup = target.closest('.navbar-nav-popup') !== null;
+  const isNavPopupToggle = target.closest('.navbar-link.nav-popup-toggle') !== null;
+  if (!isInsideNavPopup && !isNavPopupToggle && activeNavPopup.value) {
+    closeNavPopup();
   }
 };
 
@@ -293,11 +459,16 @@ const closeMobileMenu = () => {
 };
 
 /**
- * 按 ESC 关闭移动端面板
+ * 按 ESC 关闭移动端面板、「更多」菜单或导航菜单弹窗
  */
 const handleEscKey = (event: KeyboardEvent) => {
-  if (event.key === 'Escape' && activePanel.value) {
+  if (event.key !== 'Escape') return;
+  if (activePanel.value) {
     closePanel();
+  } else if (activeNavPopup.value) {
+    closeNavPopup();
+  } else if (isMoreMenuOpen.value) {
+    closeMoreMenu();
   }
 };
 
@@ -350,28 +521,41 @@ const scrollToTocAnchor = (id: string) => {
   });
 };
 
+// 📱 处理窗口大小变化
+const handleResize = () => {
+  updatePopupPosition();
+  const wasMobile = isMobile.value;
+  isMobile.value = checkIsMobile();
+
+  if (isMobile.value) {
+    // 📱 切换到移动端时，确保导航栏不会隐藏
+    isScrolled.value = false;
+    isNavbarHidden.value = false;
+    closeNavPopup();
+    if (navbarHideTimer) {
+      clearTimeout(navbarHideTimer);
+      navbarHideTimer = null;
+    }
+  } else if (wasMobile) {
+    checkInitialScroll();
+  }
+};
+
 // 🚀 组件挂载
 onMounted(() => {
+  // 🛡️ 隐藏并移除骨架屏，避免与真实导航栏重叠
+  const skeleton = document.getElementById('navbar-skeleton');
+  if (skeleton) {
+    skeleton.style.opacity = '0';
+    skeleton.style.visibility = 'hidden';
+    setTimeout(() => skeleton.remove(), 300);
+  }
+
   // 初始化移动端检测
   isMobile.value = checkIsMobile();
 
-  // 监听窗口大小变化，更新移动端状态
-  window.addEventListener('resize', () => {
-    const wasMobile = isMobile.value;
-    isMobile.value = checkIsMobile();
-
-    if (isMobile.value) {
-      // 📱 切换到移动端时，确保导航栏不会隐藏
-      isScrolled.value = false;
-      isNavbarHidden.value = false;
-      if (navbarHideTimer) {
-        clearTimeout(navbarHideTimer);
-        navbarHideTimer = null;
-      }
-    } else if (wasMobile) {
-      checkInitialScroll();
-    }
-  });
+  // 监听窗口大小变化，更新移动端状态和弹窗位置
+  window.addEventListener('resize', handleResize);
 
   // 强制检查初始滚动状态
   checkInitialScroll();
@@ -408,6 +592,7 @@ onMounted(() => {
 
 // 🧹 组件卸载
 onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
   window.removeEventListener('scroll', handleScroll);
   // 🖱️ 移除全局点击事件监听
   document.removeEventListener('click', handleClickOutside);
@@ -485,99 +670,84 @@ onUnmounted(() => {
         </a>
       </div>
 
-      <!-- 📍 导航链接（支持多级菜单） -->
-      <div class="navbar-menu">
-        <template v-for="(link, index) in navbarConfig.links" :key="`nav-${index}`">
-          <!-- 🔗 有子菜单的项 -->
-          <div
-            v-if="link.children && link.children.length > 0"
-            class="navbar-menu-item has-submenu"
-            :class="{ 'is-active': isMenuActive([link.text]) }"
-          >
-            <span
-              class="navbar-link submenu-toggle"
-              @click="toggleSubmenu([link.text], $event)"
+      <!-- 🔗 右侧区域：导航菜单 + 社交链接 + 时钟 -->
+      <div class="navbar-end">
+        <!-- 📍 导航链接（胶囊菜单，支持多级菜单） -->
+        <div class="navbar-menu" ref="navMenuRef" @mouseleave="onNavMenuLeave">
+          <!-- 💊 滑动高亮胶囊 -->
+          <div class="nav-capsule-highlight" :style="navHighlightStyle" aria-hidden="true"></div>
+          <template v-for="(link, index) in visibleLinks" :key="`nav-${index}`">
+            <!-- 🔗 有子菜单的项：点击打开瀑布流弹窗 -->
+            <div
+              v-if="link.children && link.children.length > 0"
+              class="navbar-menu-item has-submenu nav-popup"
+              :class="{ 'is-active': activeNavPopup?.link === link }"
+              data-nav-hint="可点击查看更多"
+              @mouseenter="onNavItemEnter"
+            >
+              <span
+                class="navbar-link submenu-toggle nav-popup-toggle"
+                @click="openNavPopup(link, $event)"
+              >
+                {{ link.text }}
+                <span class="submenu-arrow" :class="{ 'is-rotated': activeNavPopup?.link === link }">▶</span>
+              </span>
+            </div>
+            <!-- 🔗 普通一级链接 -->
+            <a
+              v-else
+              :href="link.href"
+              class="navbar-link"
+              data-nav-hint="点击可跳转"
+              :target="link.external ? '_blank' : undefined"
+              :rel="link.external ? 'noopener noreferrer' : undefined"
+              @mouseenter="onNavItemEnter"
             >
               {{ link.text }}
-              <span class="submenu-arrow" :class="{ 'is-rotated': isMenuActive([link.text]) }">▶</span>
-            </span>
-            <!-- 📂 二级菜单 -->
-            <div class="submenu level-1">
-              <template v-for="(child, childIndex) in link.children" :key="`nav-${index}-${childIndex}`">
-                <!-- 🔗 有三级菜单的项 -->
-                <div
-                  v-if="child.children && child.children.length > 0"
-                  class="submenu-item has-submenu"
-                  :class="{ 'is-active': isMenuActive([link.text, child.text]) }"
-                >
-                  <span
-                    class="submenu-link submenu-toggle"
-                    @click="toggleSubmenu([link.text, child.text], $event)"
-                  >
-                    {{ child.text }}
-                    <span class="submenu-arrow" :class="{ 'is-rotated': isMenuActive([link.text, child.text]) }">▶</span>
-                  </span>
-                  <!-- 📂 三级菜单 -->
-                  <div class="submenu level-2">
-                    <a
-                      v-for="(grandChild, grandChildIndex) in child.children"
-                      :key="`nav-${index}-${childIndex}-${grandChildIndex}`"
-                      :href="grandChild.href"
-                      class="submenu-link"
-                      :target="grandChild.external ? '_blank' : undefined"
-                      :rel="grandChild.external ? 'noopener noreferrer' : undefined"
-                    >
-                      {{ grandChild.text }}
-                    </a>
-                  </div>
-                </div>
-                <!-- 🔗 普通二级链接 -->
-                <a
-                  v-else
-                  :href="child.href"
-                  class="submenu-link"
-                  :target="child.external ? '_blank' : undefined"
-                  :rel="child.external ? 'noopener noreferrer' : undefined"
-                >
-                  {{ child.text }}
-                </a>
-              </template>
-            </div>
-          </div>
-          <!-- 🔗 普通一级链接 -->
-          <a
-            v-else
-            :href="link.href"
-            class="navbar-link"
-            :target="link.external ? '_blank' : undefined"
-            :rel="link.external ? 'noopener noreferrer' : undefined"
-          >
-            {{ link.text }}
-          </a>
-        </template>
-      </div>
+            </a>
+          </template>
 
-      <!-- 🔗 右侧区域：社交链接 + 时钟 -->
-      <div class="navbar-right">
-        <!-- 社交链接区域 -->
-        <div v-if="navbarConfig.social.enabled" class="navbar-social">
-          <a
-            v-for="(social, index) in navbarConfig.social.links"
-            :key="`social-${index}`"
-            :href="social.href"
-            class="social-link"
-            :target="social.external ? '_blank' : undefined"
-            :rel="social.external ? 'noopener noreferrer' : undefined"
-            :aria-label="social.name"
+          <!-- ➕ 桌面端「更多」菜单按钮 -->
+          <button
+            v-if="hasMoreLinks"
+            class="navbar-more-btn"
+            data-nav-hint="可点击查看更多"
+            :class="{ 'is-active': isMoreMenuOpen }"
+            type="button"
+            :aria-label="'更多菜单'"
+            :aria-expanded="isMoreMenuOpen"
+            @click="toggleMoreMenu"
+            @mouseenter="onNavItemEnter"
           >
-            <!-- 🎨 使用 v-html 渲染完整 SVG 代码 -->
-            <span class="social-icon" v-html="social.icon"></span>
-          </a>
+            <MoreIcon class="navbar-more-icon" />
+          </button>
         </div>
 
-        <!-- ⏰ 时钟区域 -->
-        <div v-if="navbarConfig.clock.enabled" class="navbar-clock">
-          <Clock />
+        <!-- 🔗 社交链接 + 时钟 -->
+        <div class="navbar-right">
+          <!-- 社交链接区域 -->
+          <div v-if="navbarConfig.social.enabled" class="navbar-social">
+            <a
+              v-for="(social, index) in navbarConfig.social.links"
+              :key="`social-${index}`"
+              :href="social.href"
+              class="social-link"
+              :data-nav-hint="social.hint === '' ? undefined : (social.hint || '查看本项目仓库')"
+              :target="social.external ? '_blank' : undefined"
+              :rel="social.external ? 'noopener noreferrer' : undefined"
+              :aria-label="social.name"
+              @mouseenter="onSocialItemEnter"
+              @mouseleave="onSocialItemLeave"
+            >
+              <!-- 🎨 使用 v-html 渲染完整 SVG 代码 -->
+              <span class="social-icon" v-html="social.icon"></span>
+            </a>
+          </div>
+
+          <!-- ⏰ 时钟区域 -->
+          <div v-if="navbarConfig.clock.enabled" class="navbar-clock">
+            <Clock />
+          </div>
         </div>
       </div>
 
@@ -680,6 +850,9 @@ onUnmounted(() => {
         </div>
       </div>
 
+      <!-- 💬 导航栏居中状态提示胶囊 -->
+      <HintPill />
+
       <!-- 📱 移动端菜单按钮 -->
       <button
         class="navbar-toggle"
@@ -694,6 +867,149 @@ onUnmounted(() => {
     </div>
   </nav>
 </div>
+
+<!-- 🖥️ 桌面端导航菜单瀑布流弹窗（有子菜单的一级菜单项） -->
+<Transition name="more-menu">
+  <div
+    v-if="activeNavPopup"
+    class="navbar-nav-popup"
+    :aria-hidden="!activeNavPopup"
+  >
+    <div
+      class="navbar-nav-popup-overlay"
+      @click="closeNavPopup"
+    ></div>
+    <div
+      ref="navPopupRef"
+      class="navbar-nav-popup-panel navbar-more-panel"
+      :class="`cols-${navPopupColumns}`"
+      :style="navPopupStyle"
+    >
+      <div class="navbar-more-header">
+        <span class="navbar-more-title">{{ activeNavPopup.link.text }}</span>
+        <button
+          class="navbar-more-close"
+          type="button"
+          aria-label="关闭菜单"
+          @click="closeNavPopup"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="navbar-more-waterfall" :class="`cols-${navPopupColumns}`">
+        <!-- 🏷️ 短卡片：没有子菜单的二级链接 -->
+        <template v-for="(child, index) in activeNavPopup.link.children?.filter((c) => !c.children || c.children.length === 0)" :key="`nav-popup-short-${index}`">
+          <a
+            :href="child.href"
+            class="navbar-more-card"
+            :target="child.external ? '_blank' : undefined"
+            :rel="child.external ? 'noopener noreferrer' : undefined"
+            @click="closeNavPopup"
+          >
+            <span class="navbar-more-card-label">{{ child.text }}</span>
+          </a>
+        </template>
+        <!-- 📂 长卡片：带子菜单的二级链接（展示三级菜单） -->
+        <template v-for="(child, index) in activeNavPopup.link.children?.filter((c) => c.children && c.children.length > 0)" :key="`nav-popup-long-${index}`">
+          <div class="navbar-more-card has-children">
+            <div class="navbar-more-parent">{{ child.text }}</div>
+            <div class="navbar-more-children">
+              <a
+                v-for="(grandChild, grandChildIndex) in child.children"
+                :key="`nav-popup-long-${index}-${grandChildIndex}`"
+                :href="grandChild.href"
+                class="navbar-more-child"
+                :target="grandChild.external ? '_blank' : undefined"
+                :rel="grandChild.external ? 'noopener noreferrer' : undefined"
+                @click="closeNavPopup"
+              >
+                {{ grandChild.text }}
+              </a>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+</Transition>
+
+<!-- 🖥️ 桌面端「更多」菜单遮罩与弹窗 -->
+<Transition name="more-menu">
+  <div
+    v-if="isMoreMenuOpen"
+    class="navbar-more-menu"
+    :aria-hidden="!isMoreMenuOpen"
+  >
+    <div
+      class="navbar-more-overlay"
+      @click="closeMoreMenu"
+    ></div>
+    <div class="navbar-more-panel" :class="`cols-${moreColumns}`">
+      <div class="navbar-more-header">
+        <span class="navbar-more-title">更多导航</span>
+        <button
+          class="navbar-more-close"
+          type="button"
+          aria-label="关闭更多菜单"
+          @click="closeMoreMenu"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="navbar-more-waterfall" :class="`cols-${moreColumns}`">
+        <!-- 🏷️ 先渲染短卡片，便于在瀑布流中向上堆叠 -->
+        <template v-for="(link, index) in shortMoreLinks" :key="`more-short-${index}`">
+          <a
+            :href="link.href"
+            class="navbar-more-card"
+            :target="link.external ? '_blank' : undefined"
+            :rel="link.external ? 'noopener noreferrer' : undefined"
+            @click="closeMoreMenu"
+          >
+            <span class="navbar-more-card-label">{{ link.text }}</span>
+          </a>
+        </template>
+        <!-- 📂 再渲染带子菜单的长卡片 -->
+        <template v-for="(link, index) in longMoreLinks" :key="`more-long-${index}`">
+          <div class="navbar-more-card has-children">
+            <div class="navbar-more-parent">{{ link.text }}</div>
+            <div class="navbar-more-children">
+              <a
+                v-for="(child, childIndex) in link.children"
+                :key="`more-long-${index}-${childIndex}`"
+                :href="child.href"
+                class="navbar-more-child"
+                :target="child.external ? '_blank' : undefined"
+                :rel="child.external ? 'noopener noreferrer' : undefined"
+                @click="closeMoreMenu"
+              >
+                {{ child.text }}
+              </a>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+</Transition>
 
 <!-- 📱 移动端菜单遮罩与弹窗 -->
 <div

@@ -5,7 +5,11 @@
 -->
 
 <template>
-  <article class="post-card">
+  <article
+    class="post-card"
+    @mouseenter="handleCardEnter"
+    @mouseleave="handleCardLeave"
+  >
     <div class="post-card-inner">
       <!-- 🖼️ 文档封面 -->
       <a
@@ -99,13 +103,25 @@
 import { ref } from 'vue';
 import type { Post } from '../types/post';
 import { generateSrcSet } from '../utils/image';
+import { useHintPill } from '../composables/useHintPill';
 
 /* 📋 Props 定义 */
 interface Props {
   post: Post;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
+
+/* 💬 状态提示胶囊 */
+const { show: showHint, hide: hideHint } = useHintPill();
+
+const handleCardEnter = () => {
+  showHint(`⪽点击查看⪾${props.post.title}`);
+};
+
+const handleCardLeave = () => {
+  hideHint();
+};
 
 /* 📝 描述气泡显示 */
 const showTooltip = ref(false);

@@ -62,6 +62,8 @@ export default defineConfig({
     build: {
       // 📦 CSS 代码分割
       cssCodeSplit: true,
+      // 🗜️ 禁用 CSS 压缩以规避 lightningcss rgba 解析问题
+      cssMinify: false,
       // 🗜️ 启用 Terser 压缩（比 esbuild 更激进）
       minify: 'terser',
       terserOptions: {
@@ -87,9 +89,11 @@ export default defineConfig({
       rollupOptions: {
         output: {
           // 手动代码分割 - 只包含项目内部模块
-          manualChunks: {
+          manualChunks: (id) => {
             // 工具函数单独打包
-            'utils': ['./src/utils/image.ts', './src/utils/performance.ts'],
+            if (id.includes('src/utils/image.ts') || id.includes('src/utils/performance.ts')) {
+              return 'utils';
+            }
           },
           // 确保 chunk 文件名包含哈希
           entryFileNames: '_astro/[name].[hash].js',

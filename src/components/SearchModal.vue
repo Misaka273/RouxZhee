@@ -4,113 +4,111 @@
 -->
 
 <template>
-  <Teleport to="body">
     <Transition name="search-fade">
+    <div
+      v-if="isOpen"
+      class="rouxzhee-search-overlay"
+      role="presentation"
+      @click.self="close"
+    >
       <div
-        v-if="isOpen"
-        class="rouxzhee-search-overlay"
-        role="presentation"
-        @click.self="close"
+        class="rouxzhee-search-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label="搜索文档"
+        @keydown="handleModalKeyDown"
       >
-        <div
-          class="rouxzhee-search-modal"
-          role="dialog"
-          aria-modal="true"
-          aria-label="搜索文档"
-          @keydown="handleModalKeyDown"
-        >
-          <!-- 🔍 搜索输入区 -->
-          <div class="search-header">
-            <svg class="search-input-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.3-4.3" />
-            </svg>
-            <input
-              ref="inputRef"
-              v-model="query"
-              type="search"
-              class="search-input"
-              placeholder="搜索文档内容..."
-              autocomplete="off"
-              spellcheck="false"
-              aria-label="搜索关键词"
-              @input="handleInput"
-              @keydown="handleInputKeyDown"
-            />
-            <button class="search-close-btn" aria-label="关闭搜索" @click="close">
-              <span class="search-esc-hint">ESC</span>
-            </button>
+        <!-- 🔍 搜索输入区 -->
+        <div class="search-header">
+          <svg class="search-input-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+          <input
+            ref="inputRef"
+            v-model="query"
+            type="search"
+            class="search-input"
+            placeholder="搜索文档内容..."
+            autocomplete="off"
+            spellcheck="false"
+            aria-label="搜索关键词"
+            @input="handleInput"
+            @keydown="handleInputKeyDown"
+          />
+          <button class="search-close-btn" aria-label="关闭搜索" @click="close">
+            <span class="search-esc-hint">ESC</span>
+          </button>
+        </div>
+
+        <!-- 📋 搜索结果区 -->
+        <div class="search-body">
+          <!-- 未构建索引 -->
+          <div v-if="indexMissing" class="search-state">
+            <span class="state-icon">📦</span>
+            <p class="state-title">搜索索引尚未生成</p>
+            <p class="state-desc">请先运行 <code>npm run build</code> 构建站点并生成索引</p>
           </div>
 
-          <!-- 📋 搜索结果区 -->
-          <div class="search-body">
-            <!-- 未构建索引 -->
-            <div v-if="indexMissing" class="search-state">
-              <span class="state-icon">📦</span>
-              <p class="state-title">搜索索引尚未生成</p>
-              <p class="state-desc">请先运行 <code>npm run build</code> 构建站点并生成索引</p>
-            </div>
-
-            <!-- 空查询提示 -->
-            <div v-else-if="!query.trim()" class="search-state">
-              <span class="state-icon">🔍</span>
-              <p class="state-title">输入关键词开始搜索</p>
-              <p class="state-desc">支持中文模糊匹配，可搜索文档标题与正文内容</p>
-            </div>
-
-            <!-- 加载中 -->
-            <div v-else-if="isSearching" class="search-state">
-              <span class="state-spinner" aria-hidden="true"></span>
-              <p class="state-title">搜索中...</p>
-            </div>
-
-            <!-- 无结果 -->
-            <div v-else-if="results.length === 0" class="search-state">
-              <span class="state-icon">⁉️</span>
-              <p class="state-title">未找到相关文档</p>
-              <p class="state-desc">试试其他关键词，或检查拼写</p>
-            </div>
-
-            <!-- 结果列表 -->
-            <ul v-else class="search-results" role="listbox" aria-label="搜索结果">
-              <li
-                v-for="(item, index) in results"
-                :key="item.id"
-                class="search-result-item"
-                :class="{
-                  'is-active': index === activeIndex,
-                  'is-sub': item.isSubResult,
-                }"
-                role="option"
-                :aria-selected="index === activeIndex"
-                @mouseenter="activeIndex = index"
-                @click="navigateTo(item.url)"
-              >
-                <div class="result-main">
-                  <span v-if="item.isSubResult" class="result-sub-badge">章节</span>
-                  <h4 class="result-title">{{ item.title }}</h4>
-                  <p class="result-excerpt" v-html="item.excerpt"></p>
-                </div>
-                <svg class="result-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                  <path d="m9 18 6-6-6-6" />
-                </svg>
-              </li>
-            </ul>
+          <!-- 空查询提示 -->
+          <div v-else-if="!query.trim()" class="search-state">
+            <span class="state-icon">🔍</span>
+            <p class="state-title">输入关键词开始搜索</p>
+            <p class="state-desc">支持中文模糊匹配，可搜索文档标题与正文内容</p>
           </div>
 
-          <!-- ⌨️ 快捷键提示 -->
-          <div class="search-footer">
-            <div class="search-hints">
-              <span class="hint-item"><kbd>↑</kbd><kbd>↓</kbd> 导航</span>
-              <span class="hint-item"><kbd>Enter</kbd> 打开</span>
-              <span class="hint-item"><kbd>Esc</kbd> 关闭</span>
-            </div>
-            <span v-if="resultCount > 0" class="search-count">{{ resultCount }} 条结果</span>
+          <!-- 加载中 -->
+          <div v-else-if="isSearching" class="search-state">
+            <span class="state-spinner" aria-hidden="true"></span>
+            <p class="state-title">搜索中...</p>
           </div>
+
+          <!-- 无结果 -->
+          <div v-else-if="results.length === 0" class="search-state">
+            <span class="state-icon">⁉️</span>
+            <p class="state-title">未找到相关文档</p>
+            <p class="state-desc">试试其他关键词，或检查拼写</p>
+          </div>
+
+          <!-- 结果列表 -->
+          <ul v-else class="search-results" role="listbox" aria-label="搜索结果">
+            <li
+              v-for="(item, index) in results"
+              :key="item.id"
+              class="search-result-item"
+              :class="{
+                'is-active': index === activeIndex,
+                'is-sub': item.isSubResult,
+              }"
+              role="option"
+              :aria-selected="index === activeIndex"
+              @mouseenter="activeIndex = index"
+              @click="navigateTo(item.url)"
+            >
+              <div class="result-main">
+                <span v-if="item.isSubResult" class="result-sub-badge">章节</span>
+                <h4 class="result-title">{{ item.title }}</h4>
+                <p class="result-excerpt" v-html="item.excerpt"></p>
+              </div>
+              <svg class="result-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="m9 18 6-6-6-6" />
+              </svg>
+            </li>
+          </ul>
+        </div>
+
+        <!-- ⌨️ 快捷键提示 -->
+        <div class="search-footer">
+          <div class="search-hints">
+            <span class="hint-item"><kbd>↑</kbd><kbd>↓</kbd> 导航</span>
+            <span class="hint-item"><kbd>Enter</kbd> 打开</span>
+            <span class="hint-item"><kbd>Esc</kbd> 关闭</span>
+          </div>
+          <span v-if="resultCount > 0" class="search-count">{{ resultCount }} 条结果</span>
         </div>
       </div>
-    </Transition>
-  </Teleport>
+    </div>
+  </Transition>
 </template>
 
 <script setup lang="ts">
