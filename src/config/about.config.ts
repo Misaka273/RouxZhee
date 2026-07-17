@@ -258,7 +258,8 @@ function mergeConfig<T extends Record<string, any>>(defaultConfig: T, userConfig
 // ========================================
 // 🔧 构建时配置加载策略
 // ========================================
-const userConfigModules = import.meta.glob('./.config/*.ts', { eager: true });
+// 使用 import.meta.glob 仅加载对应的用户配置，避免不同配置间循环引用
+const userConfigModules = import.meta.glob('./.config/about.config.ts', { eager: true });
 const aboutUserModule = userConfigModules['./.config/about.config.ts'] as Record<string, any> | undefined;
 const userAboutConfig: Partial<AboutConfig> | undefined = aboutUserModule?.userAboutConfig;
 

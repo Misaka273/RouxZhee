@@ -70,15 +70,15 @@ const props = defineProps<{
   posts: Post[];
 }>();
 
-/* 🎲 当前随机文档 */
-const randomPosts = ref<Post[]>([]);
+/* 📐 展示数量与刷新间隔（需要在 randomPosts 之前定义，供首屏初始化使用） */
+const count = computed(() => bloggerConfig.cloud.random.count);
+const interval = computed(() => bloggerConfig.cloud.random.interval);
+
+/* 🎲 当前随机文档（服务端与首屏使用固定前 N 条，避免 hydration 不匹配） */
+const randomPosts = ref<Post[]>(props.posts.slice(0, count.value));
 
 /* 🔑 当前组标识，用于触发整组切换动画 */
 const groupKey = ref(0);
-
-/* 📐 展示数量与刷新间隔 */
-const count = computed(() => bloggerConfig.cloud.random.count);
-const interval = computed(() => bloggerConfig.cloud.random.interval);
 
 /* 🎲 洗牌算法（Fisher-Yates） */
 const shuffle = <T,>(arr: T[]): T[] => {
@@ -131,7 +131,7 @@ const stopAutoRefresh = () => {
   }
 };
 
-/* 👀 监听文档源变化 */
+/* 👀 监听文档源变化（不在创建时立即执行，避免 SSR 与客户端结果不一致） */
 watch(() => props.posts, (newPosts) => {
   if (newPosts.length > 0) {
     refreshRandomPosts();
@@ -140,7 +140,7 @@ watch(() => props.posts, (newPosts) => {
     randomPosts.value = [];
     stopAutoRefresh();
   }
-}, { immediate: true, deep: true });
+}, { deep: true });
 
 onMounted(() => {
   refreshRandomPosts();

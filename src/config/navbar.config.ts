@@ -152,8 +152,8 @@ function mergeConfig<T extends Record<string, any>>(defaultConfig: T, userConfig
 // ========================================
 // 🔧 构建时配置加载策略
 // ========================================
-// 使用 import.meta.glob 加载所有可能的用户配置
-const userConfigModules = import.meta.glob('./.config/*.ts', { eager: true });
+// 使用 import.meta.glob 仅加载对应的用户配置，避免不同配置间循环引用
+const userConfigModules = import.meta.glob('./.config/navbar.config.ts', { eager: true });
 
 // 获取 navbar 用户配置模块
 const navbarUserModule = userConfigModules['./.config/navbar.config.ts'] as Record<string, any> | undefined;

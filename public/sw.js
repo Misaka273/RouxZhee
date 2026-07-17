@@ -107,9 +107,9 @@ self.addEventListener('fetch', (event) => {
  * 🥇 Cache First 策略 - 优先使用缓存
  */
 async function cacheFirstStrategy(
-  request: Request,
-  cacheName: string
-): Promise<Response> {
+  request,
+  cacheName
+) {
   const cachedResponse = await caches.match(request);
 
   if (cachedResponse) {
@@ -137,9 +137,9 @@ async function cacheFirstStrategy(
  * 🌐 Network First 策略 - 优先使用网络
  */
 async function networkFirstStrategy(
-  request: Request,
-  cacheName: string
-): Promise<Response> {
+  request,
+  cacheName
+) {
   try {
     const networkResponse = await fetch(request);
 
@@ -160,9 +160,9 @@ async function networkFirstStrategy(
  * 🔄 Stale While Revalidate 策略 - 先返回缓存，后台更新
  */
 async function staleWhileRevalidateStrategy(
-  request: Request,
-  cacheName: string
-): Promise<Response> {
+  request,
+  cacheName
+) {
   const cachedResponse = await caches.match(request);
 
   // 后台获取最新数据并更新缓存
@@ -186,9 +186,9 @@ async function staleWhileRevalidateStrategy(
  * 🔄 后台更新缓存
  */
 async function updateCacheInBackground(
-  request: Request,
-  cacheName: string
-): Promise<void> {
+  request,
+  cacheName
+) {
   try {
     const response = await fetch(request);
 

@@ -69,22 +69,19 @@ const seo = resolvePageSeo(
     <link rel="preload" href="/fonts/xnyt.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/筑紫A丸.woff2" as="font" type="font/woff2" crossorigin />
 
-    <!-- 🔍 关键 CSS 预加载 - 优先渲染关键路径 -->
-    <link rel="preload" as="style" href="/_astro/variables.scss" />
-
   </head>
   <body>
     <!-- 📄 页面内容 -->
     <slot />
 
     <!-- 🦶 页脚 - 运行时间等信息 -->
-    <Footer client:load="vue" />
+    <Footer client:load />
 
     <!-- 🧰 浮动工具栏 - 搜索/主题切换/回到顶部 -->
-    <FloatingToolbar client:load="vue" />
+    <FloatingToolbar client:load />
 
     <!-- 🔍 搜索弹窗 -->
-    <SearchModal client:load="vue" />
+    <SearchModal client:load />
 
     <!-- 🔄 Service Worker 注册 - 离线缓存支持 -->
     <script is:inline>
