@@ -6,7 +6,7 @@
     "dev": "node scripts/rz-start.mjs dev",
     "start": "node scripts/rz-start.mjs start",
     "build": "node scripts/rz-start.mjs build",
-    "build:diylujing": "set DEPLOY_BASE=/zr&& set DEPLOY_SITE=https://zus.baimu.live&& node scripts/rz-start.mjs build && npm run postbuild",
+    "build:diylujing": "set DEPLOY_BASE=/rz&& set DEPLOY_SITE=https://zus.baimu.live&& node scripts/rz-start.mjs build && npm run postbuild",
     "content:export": "node scripts/rz-start.mjs export",
     "astro:dev": "astro dev",
     "astro:build": "astro build",

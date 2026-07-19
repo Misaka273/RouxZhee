@@ -11,10 +11,13 @@ export const base: string = import.meta.env.BASE_URL;
  * 拼接 base 前缀
  * - 外部链接（http/https/mailto/锚点/#）原样返回
  * - 以 '/' 开头的站内路径自动补全 base 前缀
- * - 已是完整 base 路径或相对路径原样返回
+ * - 裸路径（如 docs/foo）会先规范为根绝对路径，避免在嵌套文档页被当成相对路径
+ *   （否则 /docs/sake/ + docs/software → /docs/sake/docs/software）
+ * - 显式相对路径（./ ../）保持相对，不处理
  *
  * @example base='/zr/' 时: withBase('/about') => '/zr/about'
  *          base='/' 时:    withBase('/about') => '/about'
+ *          withBase('docs/foo') => '/docs/foo'（或带 base 前缀）
  */
 export function withBase(path: string): string {
   if (!path) return path;
@@ -22,12 +25,29 @@ export function withBase(path: string): string {
   if (/^(https?:)?\/\//.test(path) || path.startsWith('mailto:') || path.startsWith('#')) {
     return path;
   }
-  if (!path.startsWith('/')) return path;
+  // 显式相对路径（./foo、../foo、?query）保持原样
+  if (path.startsWith('.') || path.startsWith('?')) {
+    return path;
+  }
+
+  // 裸路径规范为根绝对路径，防止嵌套页下相对解析导致路径重复拼接
+  let normalized = path.startsWith('/') ? path : `/${path}`;
 
   const prefix = base.endsWith('/') ? base.slice(0, -1) : base;
   // 根路径
-  if (path === '/') return prefix === '' ? '/' : `${prefix}/`;
+  if (normalized === '/') return prefix === '' ? '/' : `${prefix}/`;
   // 已带 base 前缀，避免重复拼接
-  if (prefix !== '' && (path === prefix || path.startsWith(`${prefix}/`))) return path;
-  return `${prefix}${path}`;
+  if (prefix !== '' && (normalized === prefix || normalized.startsWith(`${prefix}/`))) {
+    return normalized;
+  }
+  return `${prefix}${normalized}`;
+}
+
+/**
+ * 文档 slug → 带 base 的站内绝对链接
+ * @example docHref('docs/software/fth7h') => '/docs/software/fth7h'（或 /zr/docs/...）
+ */
+export function docHref(slug: string): string {
+  if (!slug) return withBase('/');
+  return withBase(slug.startsWith('/') ? slug : `/${slug}`);
 }

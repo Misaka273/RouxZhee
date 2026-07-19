@@ -1,6 +1,6 @@
 // 🕊️白木 原创开发 🔗gl.baimu.live
 // 😎余温 原创开发 🔗https://wiki.xxdevops.cn
-// 导航栏样式 - 双模式设计
+// 导航栏样式
 
 // ========================================
 // 🛡️ 防止闪烁 - 服务端渲染样式
@@ -867,6 +867,41 @@
     border-top: 1px dashed var(--text-secondary);
     opacity: 0.35;
   }
+}
+
+// 📂 三级菜单分组（长卡片内嵌套子菜单）
+.navbar-more-grandchild-group {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+  padding-left: 0.5em;
+
+  // 左侧虚线
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 1px;
+    border-left: 1px dashed var(--text-secondary);
+    opacity: 0.35;
+  }
+}
+
+.navbar-more-grandchild-title {
+  padding: 6px 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-color);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.navbar-more-grandchild {
+  padding-left: 12px;
 }
 
 // ========================================
