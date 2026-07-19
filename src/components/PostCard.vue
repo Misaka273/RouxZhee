@@ -54,6 +54,11 @@
 
       <!-- 📝 文档信息 -->
       <div class="post-content">
+        <!-- 🏷️ 分类勋章 -->
+        <span v-if="post.category" class="post-category-badge">
+          {{ post.category }}
+        </span>
+
         <!-- 📌 标题 -->
         <h3 class="post-title">
           <a :href="post.url" class="post-title-link">
@@ -80,6 +85,38 @@
           >
             {{ post.description }}
           </div>
+        </div>
+
+        <!-- 🏷️ 标签勋章（最多3个，超出显示省略勋章） -->
+        <div v-if="post.tags && post.tags.length > 0" class="post-tags">
+          <span
+            v-for="tag in post.tags.slice(0, 3)"
+            :key="tag"
+            class="post-tag-badge"
+          >
+            {{ tag }}
+          </span>
+          <span
+            v-if="post.tags.length > 3"
+            class="post-tag-badge post-tag-more"
+            @mouseenter="handleTagMoreEnter"
+            @mouseleave="handleTagMoreLeave"
+          >
+            ···
+            <span
+              class="post-tag-more-tooltip"
+              :class="{ show: showTagTooltip }"
+              role="tooltip"
+            >
+              <span
+                v-for="tag in post.tags.slice(3)"
+                :key="tag"
+                class="post-tag-badge"
+              >
+                {{ tag }}
+              </span>
+            </span>
+          </span>
         </div>
 
         <!-- 📅 发布时间 -->
@@ -132,6 +169,17 @@ const handleDescriptionEnter = () => {
 
 const handleDescriptionLeave = () => {
   showTooltip.value = false;
+};
+
+/* 🏷️ 标签省略勋章气泡显示 */
+const showTagTooltip = ref(false);
+
+const handleTagMoreEnter = () => {
+  showTagTooltip.value = true;
+};
+
+const handleTagMoreLeave = () => {
+  showTagTooltip.value = false;
 };
 
 /* 📅 日期格式化函数 */
@@ -284,6 +332,22 @@ const handleImageError = (event: Event) => {
     gap: var(--card-content-gap);
     border-radius: 0 0 var(--card-border-radius) var(--card-border-radius);
 
+    /* 🏷️ 分类勋章 */
+    .post-category-badge {
+      display: inline-flex;
+      align-items: center;
+      align-self: flex-start;
+      padding: 0.15rem 0.65rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      color: var(--primary-color);
+      background: color-mix(in srgb, var(--primary-color) 12%, transparent);
+      border: 1px solid color-mix(in srgb, var(--primary-color) 35%, transparent);
+      border-radius: 999px;
+      line-height: 1.4;
+    }
+
     /* 📌 标题 */
     .post-title {
       margin: 0;
@@ -359,6 +423,98 @@ const handleImageError = (event: Event) => {
         opacity: 1;
         visibility: visible;
         transform: translateX(-50%) scale(1);
+      }
+    }
+
+    /* 🏷️ 标签勋章 */
+    .post-tags {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.375rem;
+
+      .post-tag-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.1rem 0.55rem;
+        font-size: 0.7rem;
+        line-height: 1.4;
+        color: var(--text-secondary);
+        background: color-mix(in srgb, var(--text-secondary) 8%, transparent);
+        border: 1px solid color-mix(in srgb, var(--text-secondary) 20%, transparent);
+        border-radius: 999px;
+        white-space: nowrap;
+        transition: all var(--transition-normal);
+
+        &:hover {
+          color: var(--primary-color);
+          background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+          border-color: color-mix(in srgb, var(--primary-color) 30%, transparent);
+        }
+      }
+
+      /* ⭕ 省略勋章 */
+      .post-tag-more {
+        position: relative;
+        padding: 0;
+        width: 1.4rem;
+        height: 1.4rem;
+        border-radius: 50%;
+        font-weight: 700;
+        letter-spacing: 0;
+        cursor: help;
+      }
+
+      /* 💬 省略勋章气泡 */
+      .post-tag-more-tooltip {
+        position: absolute;
+        bottom: calc(100% + 10px);
+        left: 50%;
+        transform: translateX(-50%) scale(0.8);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.375rem;
+        padding: 8px 10px;
+        width: max-content;
+        max-width: min(320px, calc(100vw - 2rem));
+        background: var(--tooltip-bg);
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        color: var(--tooltip-text);
+        font-size: 0.8125rem;
+        font-weight: 400;
+        line-height: 1.5;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.25s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        z-index: 100;
+        pointer-events: none;
+
+        /* 🏷️ 气泡内勋章适配气泡底色 */
+        .post-tag-badge {
+          color: var(--tooltip-text);
+          background: color-mix(in srgb, var(--tooltip-text) 10%, transparent);
+          border-color: color-mix(in srgb, var(--tooltip-text) 25%, transparent);
+        }
+
+        &::after {
+          content: '';
+          position: absolute;
+          top: auto;
+          bottom: -6px;
+          left: 50%;
+          transform: translateX(-50%);
+          border-width: 6px 6px 0 6px;
+          border-style: solid;
+          border-color: var(--tooltip-bg) transparent transparent transparent;
+        }
+
+        &.show {
+          opacity: 1;
+          visibility: visible;
+          transform: translateX(-50%) scale(1);
+        }
       }
     }
 
