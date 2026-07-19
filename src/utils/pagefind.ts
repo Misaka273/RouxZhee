@@ -3,6 +3,7 @@
 */
 
 import type { PagefindModule, PagefindSearchFragment } from '../types/pagefind';
+import { withBase } from './base';
 
 let pagefindModule: PagefindModule | null = null;
 let initPromise: Promise<PagefindModule | null> | null = null;
@@ -13,7 +14,7 @@ export async function isPagefindAvailable(): Promise<boolean> {
   if (indexAvailable !== null) return indexAvailable;
 
   try {
-    const response = await fetch('/pagefind/pagefind-entry.json', { method: 'HEAD' });
+    const response = await fetch(withBase('/pagefind/pagefind-entry.json'), { method: 'HEAD' });
     indexAvailable = response.ok;
   } catch {
     indexAvailable = false;
@@ -27,7 +28,7 @@ async function importPagefind(): Promise<PagefindModule> {
   const importer = new Function('specifier', 'return import(specifier)') as (
     specifier: string
   ) => Promise<PagefindModule>;
-  return importer('/pagefind/pagefind.js');
+  return importer(withBase('/pagefind/pagefind.js'));
 }
 
 /** 懒加载并初始化 Pagefind */
@@ -78,7 +79,7 @@ export async function flattenSearchResults(
     items.push({
       id: result.id,
       title,
-      url: data.url,
+      url: withBase(data.url),
       excerpt: data.excerpt,
     });
 
@@ -87,7 +88,7 @@ export async function flattenSearchResults(
         items.push({
           id: `${result.id}-${sub.url}`,
           title: sub.title || title,
-          url: sub.url,
+          url: withBase(sub.url),
           excerpt: sub.excerpt,
           isSubResult: true,
         });

@@ -13,6 +13,7 @@ import Layout from '../layouts/Layout.astro';
 import NavBar from '../components/Navbar.vue';
 import DocContent from '../components/doc/DocContent.vue';
 import { createPageSeo } from '../utils/seo';
+import { withBase } from '../utils/base';
 
 /* 📋 类型定义 */
 import type { DocMeta, TocItem, DocNavigation, CategoryDoc, CategoryItem } from '../types/doc';
@@ -495,7 +496,7 @@ if (existsSync(filePath)) {
     // 🔽提取封面图片
     const coverMatch = frontmatter.match(/cover:\s*['"]?([^'"\r\n]+)['"]?/);
     if (coverMatch) {
-      meta.cover = coverMatch[1].trim();
+      meta.cover = withBase(coverMatch[1].trim());
     }
 
     // 🔽提取自定义 URL
@@ -517,7 +518,7 @@ if (existsSync(filePath)) {
 
     const ogImageMatch = frontmatter.match(/ogImage:\s*['"]?([^'"\r\n]+)['"]?/);
     if (ogImageMatch) {
-      meta.ogImage = ogImageMatch[1].trim();
+      meta.ogImage = withBase(ogImageMatch[1].trim());
     }
 
     const updateDateMatch = frontmatter.match(/updateDate:\s*['"]?([^'"\r\n]+)['"]?/);

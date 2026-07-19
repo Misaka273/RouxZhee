@@ -8,6 +8,7 @@ import { seoConfig } from '../seo.config';
 import { aboutConfig } from '../about.config';
 import { bloggerConfig } from '../blogger.config';
 import { themeConfig } from '../theme.config';
+import { withBase } from '../../utils/base';
 
 // ========================================
 // 📝 用户自定义配置
@@ -19,7 +20,7 @@ export const userSiteOverviewConfig: Partial<SiteOverviewConfig> = {
   site: {
     name: seoConfig.siteName,
     description: seoConfig.defaultDescription,
-    icon: '/favicon.svg',
+    icon: withBase('/favicon.svg'),
     status: 'normal',
   },
 

@@ -1,6 +1,8 @@
 // 🕊️白木 原创开发 🔗gl.baimu.live
 // SEO 配置 - 双层配置架构设计
 
+import { withBase } from '../utils/base';
+
 // ========================================
 // 📋 默认配置
 // ========================================
@@ -18,7 +20,7 @@ export const defaultSeoConfig = {
   defaultDescription: 'RouxZhee博客 - 注重阅读与写文档的个人博客',
 
   /** 默认社交分享 / 搜索引擎配图 */
-  defaultImage: '/assets/img/RouxZhee-shilitu.jpg',
+  defaultImage: withBase('/assets/img/RouxZhee-shilitu.jpg'),
 
   /** Open Graph 区域设置 */
   locale: 'zh_CN',

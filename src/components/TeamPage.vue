@@ -189,7 +189,7 @@
         <SectionTitle subtitle="THEMES" title="RouxZhee 主题" />
         <div class="themes-grid">
           <a
-            v-for="(theme, index) in themes"
+            v-for="(theme, index) in themesWithBase"
             :key="`theme-${index}`"
             :href="theme.link"
             target="_blank"
@@ -232,7 +232,7 @@
         <SectionTitle subtitle="PLUGINS" title="RouxZhee 插件" />
         <div class="plugins-grid">
           <a
-            v-for="(plugin, index) in plugins"
+            v-for="(plugin, index) in pluginsWithBase"
             :key="`plugin-${index}`"
             :href="plugin.link"
             target="_blank"
@@ -304,6 +304,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import type { TeamConfig } from '../types/team';
 import SectionTitle from './SectionTitle.vue';
+import { withBase } from '../utils/base';
 
 interface Props {
   config: TeamConfig;
@@ -408,7 +409,15 @@ const plugins: PluginItem[] = [
   },
 ];
 
-/* 📏 取最长 Slogan 文本，用于自适应卡片宽度 */
+/* 📂 为站内资源/链接拼接 base 前缀 */
+function withBaseTheme(item: ThemeItem): ThemeItem {
+  return { ...item, link: withBase(item.link), cover: withBase(item.cover) };
+}
+function withBasePlugin(item: PluginItem): PluginItem {
+  return { ...item, link: withBase(item.link), cover: withBase(item.cover) };
+}
+const themesWithBase = computed(() => themes.map(withBaseTheme));
+const pluginsWithBase = computed(() => plugins.map(withBasePlugin));
 const longestSlogan = computed(() => {
   const parts = config.slogan.parts || [];
   return parts.slice().sort((a, b) => b.length - a.length)[0] || '';

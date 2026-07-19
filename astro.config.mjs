@@ -47,10 +47,14 @@ export default defineConfig({
   ],
 
   // 🌐 站点 URL（全项目唯一配置入口，SEO / canonical / og:url 等均从此自动同步）
-  site: 'https://gl.baimu.live',
+// 支持环境变量覆盖：DEPLOY_SITE 站点地址，DEPLOY_BASE 部署子路径（如 /zr）
+site: process.env.DEPLOY_SITE || 'https://gl.baimu.live',
 
-  // 📄 输出模式配置
-  output: 'static',
+// 📂 部署子路径（根部署时为 '/'，子路径部署如 '/zr'）
+base: process.env.DEPLOY_BASE || '/',
+
+// 📄 输出模式配置
+output: 'static',
 
   // 🚀 Vite 构建优化
   vite: {

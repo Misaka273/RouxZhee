@@ -6,10 +6,11 @@
     "dev": "node scripts/rz-start.mjs dev",
     "start": "node scripts/rz-start.mjs start",
     "build": "node scripts/rz-start.mjs build",
+    "build:diylujing": "set DEPLOY_BASE=/zr&& set DEPLOY_SITE=https://zus.baimu.live&& node scripts/rz-start.mjs build && npm run postbuild",
     "content:export": "node scripts/rz-start.mjs export",
     "astro:dev": "astro dev",
     "astro:build": "astro build",
-    "postbuild": "pagefind --site dist && node scripts/sync-pagefind.mjs",
+    "postbuild": "node scripts/pagefind-build.mjs && node scripts/sync-pagefind.mjs",
     "preview": "astro preview",
     "astro": "astro"
   },

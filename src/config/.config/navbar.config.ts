@@ -2,6 +2,7 @@
 // 用户自定义导航栏配置 - 覆盖默认配置
 
 import type { NavbarConfig, NavLink, SocialLink } from '../navbar.config';
+import { withBase } from '../../utils/base';
 
 // ========================================
 // 📝 用户自定义配置
@@ -10,7 +11,7 @@ import type { NavbarConfig, NavLink, SocialLink } from '../navbar.config';
 export const userNavbarConfig: Partial<NavbarConfig> = {
   // 🏠 Logo 配置
   logo: {
-    src: '/favicon.svg',
+    src: withBase('/favicon.svg'),
     siteName: 'RouxZhee',
     showLogo: true,
     showSiteName: true,

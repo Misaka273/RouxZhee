@@ -11,6 +11,7 @@ import Clock from './Clock.vue';
 import MoreIcon from './ico/MoreIcon.vue';
 import HintPill from './HintPill.vue';
 import { navbarConfig, type NavLink } from '../config/navbar.config';
+import { withBase } from '../utils/base';
 import { useFooterDrawer } from '../composables/useFooterDrawer';
 import { useHintPill } from '../composables/useHintPill';
 import type { TocItem, CategoryDoc, CategoryItem } from '../types/doc';
@@ -105,9 +106,19 @@ const updatePopupPosition = () => {
   popupPositionTick.value++;
 };
 
+// 📂 递归为站内导航链接拼接 base 前缀（外部链接保持不变）
+function withBaseLinks(links: NavLink[]): NavLink[] {
+  return links.map((link) => ({
+    ...link,
+    href: link.href ? withBase(link.href) : link.href,
+    children: link.children ? withBaseLinks(link.children) : link.children,
+  }));
+}
+
 // 📍 桌面端导航菜单拆分：按 collapse 字段决定展示或收纳
-const visibleLinks = computed(() => navbarConfig.links.filter((link) => !link.collapse));
-const moreLinks = computed(() => navbarConfig.links.filter((link) => link.collapse));
+const allLinks = computed(() => withBaseLinks(navbarConfig.links as NavLink[]));
+const visibleLinks = computed(() => allLinks.value.filter((link) => !link.collapse));
+const moreLinks = computed(() => allLinks.value.filter((link) => link.collapse));
 const hasMoreLinks = computed(() => moreLinks.value.length > 0);
 
 // 🧮 根据「更多」菜单内容动态决定瀑布流列数
@@ -656,10 +667,10 @@ onUnmounted(() => {
       <div class="navbar-container">
       <!-- 🏠 Logo 区域 -->
       <div class="navbar-brand-wrapper">
-        <a href="/" class="navbar-brand" @click="closeMobileMenu" :aria-label="navbarConfig.logo.siteName">
+        <a :href="withBase('/')" class="navbar-brand" @click="closeMobileMenu" :aria-label="navbarConfig.logo.siteName">
           <img
             v-if="navbarConfig.logo.showLogo"
-            :src="navbarConfig.logo.src"
+            :src="withBase(navbarConfig.logo.src)"
             :alt="navbarConfig.logo.siteName"
             class="navbar-logo"
             decoding="sync"
@@ -674,6 +685,8 @@ onUnmounted(() => {
       <div class="navbar-end">
         <!-- 📍 导航链接（胶囊菜单，支持多级菜单） -->
         <div class="navbar-menu" ref="navMenuRef" @mouseleave="onNavMenuLeave">
+          <!-- 💬 导航状态提示胶囊：固定在菜单左侧，与菜单保持 20px 间距 -->
+          <HintPill placement="nav-left" />
           <!-- 💊 滑动高亮胶囊 -->
           <div class="nav-capsule-highlight" :style="navHighlightStyle" aria-hidden="true"></div>
           <template v-for="(link, index) in visibleLinks" :key="`nav-${index}`">
@@ -849,9 +862,6 @@ onUnmounted(() => {
           </button>
         </div>
       </div>
-
-      <!-- 💬 导航栏居中状态提示胶囊 -->
-      <HintPill />
 
       <!-- 📱 移动端菜单按钮 -->
       <button
@@ -1046,7 +1056,7 @@ onUnmounted(() => {
     <!-- 🧭 导航面板 -->
     <template v-if="activePanel === 'nav'">
       <div class="mobile-menu-cards">
-        <template v-for="(link, index) in navbarConfig.links" :key="`mobile-${index}`">
+        <template v-for="(link, index) in allLinks" :key="`mobile-${index}`">
           <!-- 🔗 有子菜单的项 -->
           <div
             v-if="link.children && link.children.length > 0"
@@ -1181,7 +1191,7 @@ onUnmounted(() => {
               <a
                 v-for="doc in category.docs"
                 :key="doc.slug"
-                :href="`/${doc.slug}`"
+                :href="withBase(`/${doc.slug}`)"
                 class="mobile-menu-link"
                 :class="{ 'is-current': doc.isCurrent }"
               >
@@ -1196,7 +1206,7 @@ onUnmounted(() => {
           <a
             v-for="doc in categoryDocs"
             :key="doc.slug"
-            :href="`/${doc.slug}`"
+            :href="withBase(`/${doc.slug}`)"
             class="mobile-menu-link"
             :class="{ 'is-current': doc.isCurrent }"
           >

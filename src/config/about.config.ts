@@ -2,6 +2,7 @@
 // 个人介绍页面配置 - 双层配置架构设计
 
 import { bloggerConfig } from './blogger.config';
+import { withBase } from '../utils/base';
 
 // ========================================
 // 📋 默认配置
@@ -38,7 +39,7 @@ export const defaultAboutConfig = {
 
   // 📖 故事钩子 · 共鸣区：paragraphs 数组可继续追加段落
   story: {
-    image: '/assets/shiroki.avif',
+    image: withBase('/assets/shiroki.avif'),
     quote: '我曾经也因为半夜线上告警，抱着电脑在出租屋里哭过',
     paragraphs: [
       '起点：我曾是个连 Git 都不会用的菜鸟',
@@ -151,9 +152,9 @@ export const defaultAboutConfig = {
     featured: {
       label: '📚 精选代表作',
       links: [
-        { icon: '🔥', text: '01. 基础语法', href: '/basic-syntax-guide' },
-        { icon: '🔥', text: '02. 代码块语法示例', href: '/code-block-syntax-guide' },
-        { icon: '🔥', text: '03. 链接语法示例', href: '/link-syntax-guide' },
+        { icon: '🔥', text: '01. 基础语法', href: withBase('/basic-syntax-guide') },
+        { icon: '🔥', text: '02. 代码块语法示例', href: withBase('/code-block-syntax-guide') },
+        { icon: '🔥', text: '03. 链接语法示例', href: withBase('/link-syntax-guide') },
       ],
     },
     projects: {
@@ -209,7 +210,7 @@ export const defaultAboutConfig = {
     updateText: '更新于 2026 年 7 月',
     // 🖼️ 底部图片：支持本地路径、外部 URL 或 { src, alt, href, external }
     images: [
-      '/assets/img/fileName.png',
+      withBase('/assets/img/fileName.png'),
       // 外部图片直链
       // 'https://mu.baimu.live/img/acg/',
       // 可点击跳转的外部图片

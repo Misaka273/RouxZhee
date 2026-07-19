@@ -6,12 +6,17 @@ const STATIC_CACHE_NAME = 'rouxzhee-static-v1';
 const DYNAMIC_CACHE_NAME = 'rouxzhee-dynamic-v1';
 
 // 📦 需要预缓存的静态资源
-const PRECACHE_URLS = [
-  '/',
-  '/favicon.svg',
-  '/fonts/ZiHun232Hao.woff2',
-  '/fonts/筑紫A丸.woff2',
-];
+// 根据 Service Worker 注册 scope 自动推导子路径前缀，支持根路径和子路径部署
+function getPrecacheUrls() {
+  const scope = self.registration?.scope || location.origin + '/';
+  const basePath = new URL(scope).pathname.replace(/\/$/, '');
+  return [
+    `${basePath}/`,
+    `${basePath}/favicon.svg`,
+    `${basePath}/fonts/ZiHun232Hao.woff2`,
+    `${basePath}/fonts/筑紫A丸.woff2`,
+  ];
+}
 
 // ⏰ 缓存过期时间（毫秒）
 const CACHE_EXPIRY = {
@@ -27,7 +32,7 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE_NAME).then((cache) => {
       console.log('📦 预缓存静态资源');
-      return cache.addAll(PRECACHE_URLS);
+      return cache.addAll(getPrecacheUrls());
     })
   );
 

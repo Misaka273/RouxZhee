@@ -83,6 +83,7 @@ import { bloggerConfig } from '../config/blogger.config';
 import type { Post } from '../types/post';
 import type { CloudItem } from '../config/blogger.config';
 import { PerformanceMonitor } from '../utils/performance';
+import { withBase } from '../utils/base';
 
 /* ☁️ 侧边栏云标签数据（由 Astro 页面构建时传入） */
 const props = defineProps<{
@@ -262,9 +263,9 @@ const loadAllPosts = async () => {
         slug,
         title: frontmatter.title || slug,
         description: frontmatter.description || extractDescription(rawContent),
-        cover: frontmatter.cover || getRandomCover(),
+        cover: withBase(frontmatter.cover || getRandomCover()),
         date: frontmatter.date || new Date().toISOString().split('T')[0],
-        url: frontmatter.url || `/posts/${slug}`,
+        url: withBase(frontmatter.url || `/posts/${slug}`),
         tags: parseTags(frontmatter.tags),
         category: frontmatter.category || '',
         readTime: frontmatter.readTime || calculateReadTime(rawContent),
