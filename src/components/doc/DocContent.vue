@@ -98,7 +98,7 @@
             <a
               v-for="doc in categoryDocs"
               :key="doc.slug"
-              :href="`/${doc.slug}`"
+              :href="withBase(`/${doc.slug}`)"
               class="category-link"
               :class="{ 'is-current': doc.isCurrent }"
             >
@@ -173,7 +173,7 @@
           <!-- ⬅️ 上一篇 -->
           <a
             v-if="navigation?.prev"
-            :href="`/${navigation.prev.slug}`"
+            :href="withBase(`/${navigation.prev.slug}`)"
             class="nav-item nav-prev"
           >
             <span class="nav-icon">←</span>
@@ -187,7 +187,7 @@
           <!-- ➡️ 下一篇 -->
           <a
             v-if="navigation?.next"
-            :href="`/${navigation.next.slug}`"
+            :href="withBase(`/${navigation.next.slug}`)"
             class="nav-item nav-next"
           >
             <div class="nav-content">
@@ -208,6 +208,7 @@
 
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import type { DocMeta, TocItem, DocNavigation, CategoryDoc, CategoryItem } from '../../types/doc';
+import { withBase } from '../../utils/base';
 
 /* 💕 组件属性定义 */
 interface Props {

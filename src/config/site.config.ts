@@ -7,6 +7,7 @@ import { aboutConfig } from './about.config';
 import { runtimeConfig } from './runtime.config';
 import { themeConfig } from './theme.config';
 import versionInfo from '../../version.json';
+import { withBase } from '../utils/base';
 
 // ========================================
 // 📋 类型定义
@@ -87,7 +88,7 @@ export const defaultSiteOverviewConfig: SiteOverviewConfig = {
   site: {
     name: seoConfig.siteName,
     description: seoConfig.defaultDescription,
-    icon: '/favicon.svg',
+    icon: withBase('/favicon.svg'),
     createdAt: new Date(runtimeConfig.initDate).toISOString().split('T')[0],
     status: 'normal',
   },

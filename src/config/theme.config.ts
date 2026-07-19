@@ -2,6 +2,7 @@
 // 🎨 主题说明配置
 
 import versionInfo from '../../version.json';
+import { withBase } from '../utils/base';
 
 // ========================================
 // 📋 主题信息配置
@@ -11,7 +12,7 @@ export const themeConfig = {
   name: versionInfo.themeName,
 
   /** 主题预览图路径 */
-  preview: '/assets/shiroki.avif',
+  preview: withBase('/assets/shiroki.avif'),
 
   /** 主题作者 */
   author: 'RouxZhee 团队',

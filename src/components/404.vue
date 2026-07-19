@@ -40,7 +40,7 @@
 
       <!-- 🔘 操作按钮 -->
       <div class="actions">
-        <a href="/" class="btn btn-primary">
+        <a :href="withBase('/')" class="btn btn-primary">
           <span class="btn-text">{{ homeText }}</span>
           <span class="btn-icon">→</span>
         </a>
@@ -63,6 +63,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { withBase } from '../utils/base';
 
 /* 📋 组件属性 */
 interface Props {

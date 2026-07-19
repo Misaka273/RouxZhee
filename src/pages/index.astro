@@ -12,6 +12,7 @@ import { bannerConfig } from '../config/banner.config';
 import { createPageSeo } from '../utils/seo';
 import { seoConfig } from '../config/seo.config';
 import { getSiteOverviewDocData } from '../utils/siteOverview';
+import { withBase } from '../utils/base';
 import type { Post } from '../types/post';
 
 // 📁 文档目录
@@ -51,9 +52,9 @@ function getInitialPosts(filePath: string): Post[] {
           slug,
           title,
           description: String(frontMatter.description || extractDescription(content)),
-          cover: String(frontMatter.cover || '/assets/shiroki.avif'),
+          cover: withBase(String(frontMatter.cover || '/assets/shiroki.avif')),
           date: String(frontMatter.date || ''),
-          url: String(frontMatter.url || `/${slug}`),
+          url: withBase(String(frontMatter.url || `/${slug}`)),
           tags: parseTags(frontMatter.tags),
           category: String(frontMatter.category || ''),
           readTime: String(frontMatter.readTime || calculateReadTime(content)),

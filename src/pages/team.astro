@@ -7,6 +7,7 @@ import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.vue';
 import TeamPage from '../components/TeamPage.vue';
 import { createPageSeo } from '../utils/seo';
+import { withBase } from '../utils/base';
 import type { TeamConfig } from '../types/team';
 
 /* 📖 读取团队页面 MD 配置 */
@@ -71,6 +72,7 @@ function mergeTeamConfig(user: Record<string, any>, def: TeamConfig): TeamConfig
 }
 
 const teamConfig: TeamConfig = mergeTeamConfig(frontmatter, defaultConfig);
+teamConfig.brand.logo = withBase(teamConfig.brand.logo);
 
 const seo = createPageSeo({
   title: teamConfig.brand.name,
