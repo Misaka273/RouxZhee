@@ -11,7 +11,7 @@ import Clock from './Clock.vue';
 import MoreIcon from './ico/MoreIcon.vue';
 import HintPill from './HintPill.vue';
 import { navbarConfig, type NavLink } from '../config/navbar.config';
-import { withBase } from '../utils/base';
+import { withBase, docHref, base } from '../utils/base';
 import { useFooterDrawer } from '../composables/useFooterDrawer';
 import { useHintPill } from '../composables/useHintPill';
 import type { TocItem, CategoryDoc, CategoryItem } from '../types/doc';
@@ -275,6 +275,15 @@ const handleClickOutside = (event: MouseEvent) => {
 // 📝 移动端分类树展开状态
 const expandedCategories = ref<Set<string>>(new Set());
 
+// 📂 展平分类树中的文档（含子分类）
+function flattenCategoryDocs(category: CategoryItem): CategoryDoc[] {
+  const docs = [...category.docs];
+  for (const child of category.children || []) {
+    docs.push(...flattenCategoryDocs(child));
+  }
+  return docs;
+}
+
 // 🔗 切换分类展开/收起
 const toggleCategory = (path: string) => {
   const next = new Set(expandedCategories.value);
@@ -293,12 +302,13 @@ type MobilePanel = 'nav' | 'toc' | 'category' | null;
 const activePanel = ref<MobilePanel>(null);
 const isMobileMenuOpen = computed(() => activePanel.value !== null);
 
-// 📄 检测是否在文档内容页面
+// 📄 检测是否在文档内容页面（排除首页，兼容子路径部署）
 const isDocPage = computed(() => {
   if (typeof window === 'undefined') return false;
-  const path = window.location.pathname;
-  // 排除首页和其他非文档页面
-  return path !== '/' && path !== '/index.html' && path !== '';
+  const path = window.location.pathname.replace(/\/$/, '') || '/';
+  const home = (base.endsWith('/') ? base.slice(0, -1) : base) || '/';
+  const homePath = home === '' ? '/' : home;
+  return path !== homePath && path !== `${homePath}/index.html`;
 });
 
 // 📱 检测是否为移动端
@@ -1002,9 +1012,10 @@ onUnmounted(() => {
           <div class="navbar-more-card has-children">
             <div class="navbar-more-parent">{{ link.text }}</div>
             <div class="navbar-more-children">
+              <!-- 🏷️ 没有子菜单的二级链接 -->
               <a
-                v-for="(child, childIndex) in link.children"
-                :key="`more-long-${index}-${childIndex}`"
+                v-for="(child, childIndex) in link.children?.filter((c) => !c.children || c.children.length === 0)"
+                :key="`more-long-${index}-short-${childIndex}`"
                 :href="child.href"
                 class="navbar-more-child"
                 :target="child.external ? '_blank' : undefined"
@@ -1013,6 +1024,23 @@ onUnmounted(() => {
               >
                 {{ child.text }}
               </a>
+              <!-- 📂 有子菜单的二级链接（展示三级菜单） -->
+              <template v-for="(child, childIndex) in link.children?.filter((c) => c.children && c.children.length > 0)" :key="`more-long-${index}-long-${childIndex}`">
+                <div class="navbar-more-grandchild-group">
+                  <div class="navbar-more-grandchild-title">{{ child.text }}</div>
+                  <a
+                    v-for="(grandChild, grandChildIndex) in child.children"
+                    :key="`more-long-${index}-long-${childIndex}-${grandChildIndex}`"
+                    :href="grandChild.href"
+                    class="navbar-more-child navbar-more-grandchild"
+                    :target="grandChild.external ? '_blank' : undefined"
+                    :rel="grandChild.external ? 'noopener noreferrer' : undefined"
+                    @click="closeMoreMenu"
+                  >
+                    {{ grandChild.text }}
+                  </a>
+                </div>
+              </template>
             </div>
           </div>
         </template>
@@ -1189,9 +1217,9 @@ onUnmounted(() => {
             </button>
             <div v-show="expandedCategories.has(category.path)" class="mobile-menu-category-links">
               <a
-                v-for="doc in category.docs"
+                v-for="doc in flattenCategoryDocs(category)"
                 :key="doc.slug"
-                :href="withBase(`/${doc.slug}`)"
+                :href="docHref(doc.slug)"
                 class="mobile-menu-link"
                 :class="{ 'is-current': doc.isCurrent }"
               >
@@ -1206,7 +1234,7 @@ onUnmounted(() => {
           <a
             v-for="doc in categoryDocs"
             :key="doc.slug"
-            :href="withBase(`/${doc.slug}`)"
+            :href="docHref(doc.slug)"
             class="mobile-menu-link"
             :class="{ 'is-current': doc.isCurrent }"
           >

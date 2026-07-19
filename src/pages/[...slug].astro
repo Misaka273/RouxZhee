@@ -4,7 +4,7 @@
 
 /* 📁 文件系统操作 */
 import { readFileSync, existsSync, readdirSync, statSync } from 'fs';
-import { resolve, join, dirname } from 'path';
+import { resolve, join, dirname, relative } from 'path';
 import { pathToFileURL } from 'url';
 import { createMarkdownProcessor } from '@astrojs/markdown-remark';
 
@@ -192,7 +192,7 @@ function getCategoryDocs(currentFilePath: string, docDir: string): CategoryDoc[]
     return [];
   }
 
-  const relativePath = currentFilePath.replace(docDir + '\\', '').replace(docDir + '/', '');
+  const relativePath = relative(docDir, currentFilePath).replace(/\\/g, '/');
   const categoryPath = dirname(relativePath);
 
   if (categoryPath === '.' || categoryPath === '') {
@@ -705,10 +705,10 @@ const toc = parseToc(html);
 const categoryDocs = getCategoryDocs(filePath, docDir);
 
 // 🔽获取当前分类路径信息
-const currentRelativePath = filePath.replace(docDir + '\\', '').replace(docDir + '/', '');
+const currentRelativePath = relative(docDir, filePath).replace(/\\/g, '/');
 const categoryPath = dirname(currentRelativePath).replace(/\\/g, '/');
-const categoryFullPath = categoryPath;
-const categoryName = categoryPath.split('/').pop() || categoryPath;
+const categoryFullPath = categoryPath === '.' ? '' : categoryPath;
+const categoryName = categoryPath === '.' ? '' : (categoryPath.split('/').pop() || categoryPath);
 
 // 🔽判断是否在根目录
 const isRootDoc = categoryPath === '.' || categoryPath === '';

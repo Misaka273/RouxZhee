@@ -78,9 +78,9 @@
               </div>
               <div v-if="expandedCategories.has(category.path)" class="category-docs">
                 <a
-                  v-for="doc in category.docs"
+                  v-for="doc in flattenCategoryDocs(category)"
                   :key="doc.slug"
-                  :href="`/${doc.slug}`"
+                  :href="docHref(doc.slug)"
                   class="category-link"
                   :class="{ 'is-current': doc.isCurrent }"
                 >
@@ -98,7 +98,7 @@
             <a
               v-for="doc in categoryDocs"
               :key="doc.slug"
-              :href="withBase(`/${doc.slug}`)"
+              :href="docHref(doc.slug)"
               class="category-link"
               :class="{ 'is-current': doc.isCurrent }"
             >
@@ -173,7 +173,7 @@
           <!-- ⬅️ 上一篇 -->
           <a
             v-if="navigation?.prev"
-            :href="withBase(`/${navigation.prev.slug}`)"
+            :href="docHref(navigation.prev.slug)"
             class="nav-item nav-prev"
           >
             <span class="nav-icon">←</span>
@@ -187,7 +187,7 @@
           <!-- ➡️ 下一篇 -->
           <a
             v-if="navigation?.next"
-            :href="withBase(`/${navigation.next.slug}`)"
+            :href="docHref(navigation.next.slug)"
             class="nav-item nav-next"
           >
             <div class="nav-content">
@@ -208,7 +208,7 @@
 
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import type { DocMeta, TocItem, DocNavigation, CategoryDoc, CategoryItem } from '../../types/doc';
-import { withBase } from '../../utils/base';
+import { docHref } from '../../utils/base';
 
 /* 💕 组件属性定义 */
 interface Props {
@@ -252,6 +252,15 @@ const displayCategoryName = computed(() => {
 
 /* 📝 分类展开状态 */
 const expandedCategories = ref<Set<string>>(new Set());
+
+/* 📂 展平分类树中的文档（含子分类），避免只显示顶层空目录 */
+function flattenCategoryDocs(category: CategoryItem): CategoryDoc[] {
+  const docs = [...category.docs];
+  for (const child of category.children || []) {
+    docs.push(...flattenCategoryDocs(child));
+  }
+  return docs;
+}
 
 /* 🔗 切换分类展开/收起 */
 const toggleCategory = (path: string) => {

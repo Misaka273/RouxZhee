@@ -150,5 +150,12 @@ output: 'static',
   // 📝 Markdown 处理配置
   markdown: {
     remarkPlugins: [remarkStripHtmlComments],
+    // Shiki 无 git / caddy 语法；映射到相近语言，避免 fallback plaintext 警告
+    shikiConfig: {
+      langAlias: {
+        git: 'bash',
+        caddy: 'nginx',
+      },
+    },
   },
 });
