@@ -685,6 +685,8 @@ onUnmounted(() => {
       <div class="navbar-end">
         <!-- 📍 导航链接（胶囊菜单，支持多级菜单） -->
         <div class="navbar-menu" ref="navMenuRef" @mouseleave="onNavMenuLeave">
+          <!-- 💬 导航状态提示胶囊：固定在菜单左侧，与菜单保持 20px 间距 -->
+          <HintPill placement="nav-left" />
           <!-- 💊 滑动高亮胶囊 -->
           <div class="nav-capsule-highlight" :style="navHighlightStyle" aria-hidden="true"></div>
           <template v-for="(link, index) in visibleLinks" :key="`nav-${index}`">
@@ -860,9 +862,6 @@ onUnmounted(() => {
           </button>
         </div>
       </div>
-
-      <!-- 💬 导航栏居中状态提示胶囊 -->
-      <HintPill />
 
       <!-- 📱 移动端菜单按钮 -->
       <button
