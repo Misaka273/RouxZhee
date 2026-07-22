@@ -1,0 +1,59 @@
+---
+// 🕊️白木 原创开发 🔗gl.baimu.live
+// 😎余温 原创开发 🔗https://wiki.xxdevops.cn
+// 🗂️ 分类文档列表落地页
+
+import { resolve } from 'path';
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/Navbar.vue';
+import PostListPage from '../../components/PostListPage.vue';
+import { createPageSeo } from '../../utils/seo';
+import { seoConfig } from '../../config/seo.config';
+import { getCategoryCloud, getPostsByCategory } from '../../utils/siteOverview';
+import { bloggerConfig } from '../../config/blogger.config';
+
+// 📁 文档目录
+const docDir = resolve(process.cwd(), 'doc');
+
+// 🔽 生成所有分类静态路径（Astro 会自动处理 URL 编码）
+export function getStaticPaths() {
+  const staticDocDir = resolve(process.cwd(), 'doc');
+  const categories = getCategoryCloud(staticDocDir);
+
+  return categories.map((category) => ({
+    params: { category: category.name },
+    props: { categoryName: category.name },
+  }));
+}
+
+// 🗂️ 当前分类
+const { category } = Astro.params;
+const { categoryName } = Astro.props;
+const decodedCategory = category || categoryName;
+
+// 📝 获取该分类下的文档
+const posts = getPostsByCategory(docDir, decodedCategory);
+
+const seo = createPageSeo({
+  title: `${decodedCategory} - 分类 - ${seoConfig.siteName}`,
+  description: `浏览 ${seoConfig.siteName} 中分类为「${decodedCategory}」的文档，共 ${posts.length} 篇`,
+  type: 'website',
+});
+---
+
+<Layout seo={seo}>
+  <!-- 🧭 独立导航栏（分类页保持常驻） -->
+  <Navbar client:load="vue" disable-auto-hide />
+
+  <!-- 📝 分类文档列表 -->
+  <PostListPage
+    client:load="vue"
+    title="分类"
+    icon={bloggerConfig.cloud.category.icon}
+    item-label="分类"
+    item-name={decodedCategory}
+    posts={posts}
+    back-link="/archives"
+    back-text="全部分类"
+  />
+</Layout>

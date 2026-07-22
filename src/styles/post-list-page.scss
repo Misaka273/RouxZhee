@@ -1,0 +1,224 @@
+/* 🕊️白木 原创开发 🔗gl.baimu.live */
+/* 😎余温 原创开发 🔗https://wiki.xxdevops.cn */
+/* 📝 标签/分类文档列表落地页样式 */
+
+@use '../styles/variables.scss' as *;
+
+.post-list-page-wrapper {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: calc(var(--nav-height) + 32px) 20px 48px;
+  background: var(--bg-color);
+  color: var(--text-color);
+  overflow-x: hidden;
+
+  @media (max-width: 768px) {
+    padding: calc(var(--nav-height) + 24px) 16px 32px;
+  }
+}
+
+/* 🎯 页面标题 */
+.post-list-page-header {
+  position: relative;
+  text-align: center;
+  margin-bottom: 32px;
+  z-index: 2;
+
+  @media (max-width: 768px) {
+    margin-bottom: 24px;
+  }
+}
+
+.post-list-page-title-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.post-list-page-icon {
+  font-size: clamp(1.75rem, 4.5vw, 2.5rem);
+  line-height: 1;
+}
+
+.post-list-page-title {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0 0.5rem;
+  margin: 0;
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+  font-weight: 700;
+  color: var(--text-color);
+  font-family: var(--font-heading);
+}
+
+.post-list-page-label {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.post-list-page-name {
+  color: var(--primary-color);
+}
+
+.post-list-page-subtitle {
+  margin: 0 0 16px;
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  color: var(--text-secondary);
+
+  strong {
+    color: var(--primary-color);
+    font-weight: 600;
+  }
+}
+
+.post-list-page-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 100px;
+  text-decoration: none;
+  transition: all var(--transition-normal);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    transform: translateX(-2px);
+  }
+}
+
+/* 📝 文档列表主体 */
+.post-list-page-body {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  max-width: var(--max-content-width, 1440px);
+  margin: 0 auto;
+  z-index: 1;
+
+  /* 🃏 落地页专用紧凑卡片变量（仅作用于本组件内部，不影响首页） */
+  --post-list-grid-columns: repeat(5, 1fr);
+  --post-list-grid-gap: 1rem;
+  --card-content-padding: 0.875rem;
+  --card-content-gap: 0.5rem;
+  --card-title-font-size: 0.9375rem;
+  --card-description-font-size: 0.8125rem;
+  --card-description-clamp: 1;
+  --card-date-font-size: 0.75rem;
+  --card-date-icon-size: 12px;
+  --post-cover-aspect-ratio: 16 / 9;
+}
+
+/* 📄 文档卡片网格 — 落地页每行 5 个，响应式逐级收缩 */
+.post-list-grid {
+  display: grid;
+  grid-template-columns: var(--post-list-grid-columns);
+  gap: var(--post-list-grid-gap);
+  width: 100%;
+
+  @media (max-width: 1439px) {
+    --post-list-grid-columns: repeat(4, 1fr);
+  }
+
+  @media (max-width: 1199px) {
+    --post-list-grid-columns: repeat(3, 1fr);
+    --card-title-font-size: 1rem;
+    --card-description-font-size: 0.875rem;
+  }
+
+  @media (max-width: 991px) {
+    --post-list-grid-columns: repeat(2, 1fr);
+    --post-list-grid-gap: 1.25rem;
+  }
+
+  @media (max-width: 768px) {
+    --post-list-grid-columns: 1fr;
+    --post-list-grid-gap: 1rem;
+    --card-content-padding: 1.25rem;
+    --card-title-font-size: 1.125rem;
+  }
+}
+
+/* 📭 空状态 */
+.post-list-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1rem;
+  text-align: center;
+  color: var(--text-secondary);
+
+  .post-list-empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.8;
+  }
+
+  p {
+    margin: 0 0 1rem;
+    font-size: 1rem;
+  }
+}
+
+.post-list-empty-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  color: var(--primary-color);
+  background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary-color) 30%, transparent);
+  border-radius: 100px;
+  text-decoration: none;
+  transition: all var(--transition-normal);
+
+  &:hover {
+    background: color-mix(in srgb, var(--primary-color) 18%, transparent);
+    transform: translateY(-2px);
+  }
+}
+
+/* 🌙 暗色模式适配 */
+.dark-mode {
+  .post-list-page-wrapper {
+    background: var(--bg-color);
+    color: var(--text-color);
+  }
+
+  .post-list-page-title {
+    color: var(--text-color);
+  }
+
+  .post-list-page-label {
+    color: var(--text-secondary);
+  }
+
+  .post-list-page-subtitle {
+    color: var(--text-secondary);
+  }
+
+  .post-list-empty {
+    color: var(--text-secondary);
+  }
+}

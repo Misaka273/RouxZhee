@@ -55,9 +55,13 @@
       <!-- 📝 文档信息 -->
       <div class="post-content">
         <!-- 🏷️ 分类勋章 -->
-        <span v-if="post.category" class="post-category-badge">
+        <a
+          v-if="post.category"
+          :href="withBase(`/archives/${encodeName(post.category)}`)"
+          class="post-category-badge"
+        >
           {{ post.category }}
-        </span>
+        </a>
 
         <!-- 📌 标题 -->
         <h3 class="post-title">
@@ -89,13 +93,14 @@
 
         <!-- 🏷️ 标签勋章（最多3个，超出显示省略勋章） -->
         <div v-if="post.tags && post.tags.length > 0" class="post-tags">
-          <span
+          <a
             v-for="tag in post.tags.slice(0, 3)"
             :key="tag"
+            :href="withBase(`/tags/${encodeName(tag)}`)"
             class="post-tag-badge"
           >
             {{ tag }}
-          </span>
+          </a>
           <span
             v-if="post.tags.length > 3"
             class="post-tag-badge post-tag-more"
@@ -108,13 +113,14 @@
               :class="{ show: showTagTooltip }"
               role="tooltip"
             >
-              <span
+              <a
                 v-for="tag in post.tags.slice(3)"
                 :key="tag"
+                :href="withBase(`/tags/${encodeName(tag)}`)"
                 class="post-tag-badge"
               >
                 {{ tag }}
-              </span>
+              </a>
             </span>
           </span>
         </div>
@@ -141,6 +147,7 @@ import { ref } from 'vue';
 import type { Post } from '../types/post';
 import { generateSrcSet } from '../utils/image';
 import { useHintPill } from '../composables/useHintPill';
+import { withBase } from '../utils/base';
 
 /* 📋 Props 定义 */
 interface Props {
@@ -180,6 +187,11 @@ const handleTagMoreEnter = () => {
 
 const handleTagMoreLeave = () => {
   showTagTooltip.value = false;
+};
+
+/* 🔗 名称编码（用于 URL） */
+const encodeName = (name: string): string => {
+  return encodeURIComponent(name);
 };
 
 /* 📅 日期格式化函数 */
@@ -346,6 +358,13 @@ const handleImageError = (event: Event) => {
       border: 1px solid color-mix(in srgb, var(--primary-color) 35%, transparent);
       border-radius: 999px;
       line-height: 1.4;
+      text-decoration: none;
+      transition: all var(--transition-normal);
+
+      &:hover {
+        background: color-mix(in srgb, var(--primary-color) 22%, transparent);
+        border-color: color-mix(in srgb, var(--primary-color) 55%, transparent);
+      }
     }
 
     /* 📌 标题 */
@@ -445,6 +464,7 @@ const handleImageError = (event: Event) => {
         border: 1px solid color-mix(in srgb, var(--text-secondary) 20%, transparent);
         border-radius: 999px;
         white-space: nowrap;
+        text-decoration: none;
         transition: all var(--transition-normal);
 
         &:hover {

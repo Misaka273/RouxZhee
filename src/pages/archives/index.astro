@@ -1,0 +1,41 @@
+---
+// 🕊️白木 原创开发 🔗gl.baimu.live
+// 😎余温 原创开发 🔗https://wiki.xxdevops.cn
+// 🗂️ 分类云落地页（归档）
+
+import { resolve } from 'path';
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/Navbar.vue';
+import CloudPage from '../../components/CloudPage.vue';
+import { createPageSeo } from '../../utils/seo';
+import { seoConfig } from '../../config/seo.config';
+import { getCategoryCloud } from '../../utils/siteOverview';
+import { bloggerConfig } from '../../config/blogger.config';
+
+// 📁 文档目录
+const docDir = resolve(process.cwd(), 'doc');
+
+// ☁️ 读取所有文档分类
+const categories = getCategoryCloud(docDir);
+
+const seo = createPageSeo({
+  title: `文档分类 - ${seoConfig.siteName}`,
+  description: `浏览 ${seoConfig.siteName} 的所有文档分类，共 ${categories.length} 个`,
+  type: 'website',
+});
+---
+
+<Layout seo={seo}>
+  <!-- 🧭 独立导航栏（保持常驻） -->
+  <Navbar client:load="vue" disable-auto-hide />
+
+  <!-- 🗂️ 全屏分类云 -->
+  <CloudPage
+    client:load="vue"
+    title={bloggerConfig.cloud.category.title}
+    icon={bloggerConfig.cloud.category.icon}
+    item-label="分类"
+    items={categories}
+    link-prefix="/archives"
+  />
+</Layout>

@@ -24,11 +24,13 @@
         <!-- 标签云 -->
     <div class="cloud-card-body">
       <div v-if="displayItems.length > 0" ref="cloudWrapRef" class="cloud-wrap">
-        <span
+        <component
+          :is="linkPrefix ? 'a' : 'span'"
           v-for="(item, index) in displayItems"
           :key="`cloud-${item.name}`"
           class="cloud-tag"
           :class="getCloudTheme(item.name)"
+          :href="linkPrefix ? withBase(`${linkPrefix}/${encodeName(item.name)}`) : undefined"
           :style="{
             fontSize: getCloudFontSize(item.count),
             left: `calc(50% + ${positions[index]?.x ?? 0}px)`,
@@ -36,9 +38,9 @@
             zIndex: displayItems.length - index,
           }"
         >
-          {{ item.name }}
+          <span class="cloud-name">{{ item.name }}</span>
           <span class="cloud-count">{{ item.count }}</span>
-        </span>
+        </component>
       </div>
       <p v-else class="cloud-empty">暂无{{ itemLabel }}</p>
     </div>
@@ -49,6 +51,7 @@
 /* ☁️ 云标签卡片组件脚本 */
 
 import { computed, onMounted, ref } from 'vue';
+import { withBase } from '../utils/base';
 import type { CloudItem } from '../config/blogger.config';
 
 /* ☁️ 标签云容器引用与尺寸 */
@@ -72,6 +75,7 @@ const props = withDefaults(
     icon?: string;
     itemLabel?: string;
     items: CloudItem[];
+    linkPrefix?: string;
     maxCount?: number;
     minSize?: number;
     maxSize?: number;
@@ -79,11 +83,17 @@ const props = withDefaults(
   {
     icon: '☁️',
     itemLabel: '标签',
+    linkPrefix: '',
     maxCount: 20,
     minSize: 12,
     maxSize: 24,
   },
 );
+
+/* 🔗 名称编码（用于 URL） */
+function encodeName(name: string): string {
+  return encodeURIComponent(name);
+}
 
 /* ☁️ 截断后的展示数据 */
 const displayItems = computed<CloudItem[]>(() => {
@@ -260,7 +270,7 @@ function getCloudTheme(name: string): string {
     font-weight: 500;
     letter-spacing: 0.3px;
     white-space: nowrap;
-    cursor: default;
+    cursor: pointer;
     user-select: none;
     transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     background: rgba(255, 255, 255, 0.35);
@@ -272,6 +282,11 @@ function getCloudTheme(name: string): string {
     will-change: transform, box-shadow, color;
     /* 以自身中心为定位基准 */
     transform: translate(-50%, -50%);
+    text-decoration: none;
+
+    .cloud-name {
+      line-height: 1.4;
+    }
 
     .cloud-count {
       font-size: 0.75em;
