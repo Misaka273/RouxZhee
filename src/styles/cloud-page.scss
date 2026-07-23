@@ -1,0 +1,299 @@
+/* 🕊️白木 原创开发 🔗gl.baimu.live */
+/* 😎余温 原创开发 🔗https://wiki.xxdevops.cn */
+/* ☁️ 全屏云标签落地页样式 */
+
+@use '../styles/variables.scss' as *;
+
+.cloud-page-wrapper {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: calc(var(--nav-height) + 24px) 20px 24px;
+  background: var(--bg-color);
+  color: var(--text-color);
+  overflow: hidden;
+
+  @media (max-width: 768px) {
+    padding: calc(var(--nav-height) + 16px) 16px 16px;
+  }
+}
+
+/* 🎯 页面标题 */
+.cloud-page-header {
+  text-align: center;
+  margin-bottom: 16px;
+  z-index: 2;
+  flex-shrink: 0;
+
+  @media (max-width: 768px) {
+    margin-bottom: 12px;
+  }
+}
+
+.cloud-page-title {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 0 0 12px;
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+  font-weight: 700;
+  color: var(--text-color);
+  font-family: var(--font-heading);
+
+  .cloud-page-icon {
+    font-size: clamp(1.75rem, 4.5vw, 2.5rem);
+    line-height: 1;
+  }
+}
+
+.cloud-page-subtitle {
+  margin: 0;
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  color: var(--text-secondary);
+
+  strong {
+    color: var(--primary-color);
+    font-weight: 600;
+  }
+}
+
+/* ☁️ 标签云主体 */
+.cloud-page-body {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.cloud-page-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-width: min(900px, 100%);
+  max-height: 100%;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+}
+
+.cloud-page-empty {
+  margin: 0;
+  padding: 2rem 0;
+  text-align: center;
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+/* ☁️ 单个标签 */
+.cloud-page-tag {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  border-radius: 100px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  user-select: none;
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  background: rgba(255, 255, 255, 0.35);
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  will-change: transform, box-shadow, color;
+  transform: translate(-50%, -50%);
+  text-decoration: none;
+
+  .cloud-page-name {
+    line-height: 1.4;
+  }
+
+  .cloud-page-count {
+    font-size: 0.75em;
+    opacity: 0.7;
+    font-weight: 400;
+  }
+
+  &:hover {
+    transform: translate(-50%, -50%) scale(1.12) translateY(-3px);
+    box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.15);
+    z-index: 10;
+  }
+
+  /* 🎨 亮色模式颜色主题 */
+  &.tag--purple {
+    background: rgba(139, 92, 246, 0.08);
+    border-color: rgba(139, 92, 246, 0.18);
+    color: #7c3aed;
+
+    &:hover {
+      background: rgba(139, 92, 246, 0.16);
+      box-shadow: 0 8px 20px -4px rgba(139, 92, 246, 0.2);
+    }
+  }
+
+  &.tag--blue {
+    background: rgba(59, 130, 246, 0.08);
+    border-color: rgba(59, 130, 246, 0.18);
+    color: #2563eb;
+
+    &:hover {
+      background: rgba(59, 130, 246, 0.16);
+      box-shadow: 0 8px 20px -4px rgba(59, 130, 246, 0.2);
+    }
+  }
+
+  &.tag--pink {
+    background: rgba(236, 72, 153, 0.08);
+    border-color: rgba(236, 72, 153, 0.18);
+    color: #db2777;
+
+    &:hover {
+      background: rgba(236, 72, 153, 0.16);
+      box-shadow: 0 8px 20px -4px rgba(236, 72, 153, 0.2);
+    }
+  }
+
+  &.tag--cyan {
+    background: rgba(34, 211, 238, 0.08);
+    border-color: rgba(34, 211, 238, 0.18);
+    color: #0891b2;
+
+    &:hover {
+      background: rgba(34, 211, 238, 0.16);
+      box-shadow: 0 8px 20px -4px rgba(34, 211, 238, 0.2);
+    }
+  }
+
+  &.tag--green {
+    background: rgba(52, 211, 153, 0.08);
+    border-color: rgba(52, 211, 153, 0.18);
+    color: #059669;
+
+    &:hover {
+      background: rgba(52, 211, 153, 0.16);
+      box-shadow: 0 8px 20px -4px rgba(52, 211, 153, 0.2);
+    }
+  }
+
+  &.tag--orange {
+    background: rgba(251, 146, 60, 0.08);
+    border-color: rgba(251, 146, 60, 0.18);
+    color: #ea580c;
+
+    &:hover {
+      background: rgba(251, 146, 60, 0.16);
+      box-shadow: 0 8px 20px -4px rgba(251, 146, 60, 0.2);
+    }
+  }
+}
+
+/* 🌙 暗色模式适配 */
+.dark-mode {
+  .cloud-page-wrapper {
+    background: var(--bg-color);
+    color: var(--text-color);
+  }
+
+  .cloud-page-title {
+    color: var(--text-color);
+  }
+
+  .cloud-page-subtitle {
+    color: var(--text-secondary);
+  }
+
+  .cloud-page-empty {
+    color: var(--text-secondary);
+  }
+
+  .cloud-page-tag {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.75);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+    &:hover {
+      box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.3);
+    }
+
+    &.tag--purple {
+      background: rgba(139, 92, 246, 0.15);
+      border-color: rgba(139, 92, 246, 0.25);
+      color: #c4b5fd;
+
+      &:hover {
+        background: rgba(139, 92, 246, 0.25);
+        box-shadow: 0 8px 20px -4px rgba(139, 92, 246, 0.25);
+      }
+    }
+
+    &.tag--blue {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: rgba(59, 130, 246, 0.25);
+      color: #93c5fd;
+
+      &:hover {
+        background: rgba(59, 130, 246, 0.25);
+        box-shadow: 0 8px 20px -4px rgba(59, 130, 246, 0.25);
+      }
+    }
+
+    &.tag--pink {
+      background: rgba(236, 72, 153, 0.15);
+      border-color: rgba(236, 72, 153, 0.25);
+      color: #f9a8d4;
+
+      &:hover {
+        background: rgba(236, 72, 153, 0.25);
+        box-shadow: 0 8px 20px -4px rgba(236, 72, 153, 0.25);
+      }
+    }
+
+    &.tag--cyan {
+      background: rgba(34, 211, 238, 0.12);
+      border-color: rgba(34, 211, 238, 0.22);
+      color: #67e8f9;
+
+      &:hover {
+        background: rgba(34, 211, 238, 0.22);
+        box-shadow: 0 8px 20px -4px rgba(34, 211, 238, 0.2);
+      }
+    }
+
+    &.tag--green {
+      background: rgba(52, 211, 153, 0.12);
+      border-color: rgba(52, 211, 153, 0.22);
+      color: #6ee7b7;
+
+      &:hover {
+        background: rgba(52, 211, 153, 0.22);
+        box-shadow: 0 8px 20px -4px rgba(52, 211, 153, 0.2);
+      }
+    }
+
+    &.tag--orange {
+      background: rgba(251, 146, 60, 0.12);
+      border-color: rgba(251, 146, 60, 0.22);
+      color: #fdba74;
+
+      &:hover {
+        background: rgba(251, 146, 60, 0.22);
+        box-shadow: 0 8px 20px -4px rgba(251, 146, 60, 0.2);
+      }
+    }
+  }
+}

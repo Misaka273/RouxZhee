@@ -1,0 +1,59 @@
+---
+// 🕊️白木 原创开发 🔗gl.baimu.live
+// 😎余温 原创开发 🔗https://wiki.xxdevops.cn
+// 🏷️ 标签文档列表落地页
+
+import { resolve } from 'path';
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/Navbar.vue';
+import PostListPage from '../../components/PostListPage.vue';
+import { createPageSeo } from '../../utils/seo';
+import { seoConfig } from '../../config/seo.config';
+import { getTagCloud, getPostsByTag } from '../../utils/siteOverview';
+import { bloggerConfig } from '../../config/blogger.config';
+
+// 📁 文档目录
+const docDir = resolve(process.cwd(), 'doc');
+
+// 🔽 生成所有标签静态路径（Astro 会自动处理 URL 编码）
+export function getStaticPaths() {
+  const staticDocDir = resolve(process.cwd(), 'doc');
+  const tags = getTagCloud(staticDocDir);
+
+  return tags.map((tag) => ({
+    params: { tag: tag.name },
+    props: { tagName: tag.name },
+  }));
+}
+
+// 🏷️ 当前标签
+const { tag } = Astro.params;
+const { tagName } = Astro.props;
+const decodedTag = tag || tagName;
+
+// 📝 获取该标签下的文档
+const posts = getPostsByTag(docDir, decodedTag);
+
+const seo = createPageSeo({
+  title: `${decodedTag} - 标签 - ${seoConfig.siteName}`,
+  description: `浏览 ${seoConfig.siteName} 中标签为「${decodedTag}」的文档，共 ${posts.length} 篇`,
+  type: 'website',
+});
+---
+
+<Layout seo={seo}>
+  <!-- 🧭 独立导航栏（保持常驻） -->
+  <Navbar client:load="vue" disable-auto-hide />
+
+  <!-- 📝 标签文档列表 -->
+  <PostListPage
+    client:load="vue"
+    title="标签"
+    icon={bloggerConfig.cloud.tag.icon}
+    item-label="标签"
+    item-name={decodedTag}
+    posts={posts}
+    back-link="/tags"
+    back-text="全部标签"
+  />
+</Layout>

@@ -75,6 +75,8 @@ export const defaultNavbarConfig = {
         { text: '📄 示例文档', href: '/docs' },
       ],
     },
+    { text: '🏷️ 标签', href: '/tags', collapse: false },
+    { text: '🗂️ 归档', href: '/archives', collapse: true },
     {
       text: '关于',
       collapse: true,

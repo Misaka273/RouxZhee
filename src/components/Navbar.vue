@@ -25,6 +25,7 @@ interface Props {
   categoryFullPath?: string;
   categoryTree?: CategoryItem[];
   isRootDoc?: boolean;
+  disableAutoHide?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -34,7 +35,8 @@ const props = withDefaults(defineProps<Props>(), {
   categoryName: '',
   categoryFullPath: '',
   categoryTree: () => [],
-  isRootDoc: false
+  isRootDoc: false,
+  disableAutoHide: false
 });
 
 // 📊 计算属性：是否在移动端底座显示文档相关按钮
@@ -333,8 +335,8 @@ const NAVBAR_HIDE_DELAY = 3000; // ◀️ 3秒后上移隐藏
 
 // 🔗 启动导航栏淡出计时器（普通页面）
 const startNavbarFadeTimer = () => {
-  // 如果是文档页面或移动端，不使用此效果
-  if (isDocPage.value || isMobile.value) return;
+  // 如果禁用自动隐藏、是文档页面或移动端，不使用此效果
+  if (props.disableAutoHide || isDocPage.value || isMobile.value) return;
   // 清除已有计时器
   if (navbarFadeTimer) {
     clearTimeout(navbarFadeTimer);
@@ -347,8 +349,8 @@ const startNavbarFadeTimer = () => {
 
 // 🔗 启动导航栏隐藏计时器（文档页面 - 上移渐隐）
 const startNavbarHideTimer = () => {
-  // 如果不是文档页面或是移动端，不使用此效果
-  if (!isDocPage.value || isMobile.value) return;
+  // 如果禁用自动隐藏、不是文档页面或是移动端，不使用此效果
+  if (props.disableAutoHide || !isDocPage.value || isMobile.value) return;
   // 清除已有计时器
   if (navbarHideTimer) {
     clearTimeout(navbarHideTimer);
@@ -396,6 +398,8 @@ const handleTriggerMouseEnter = () => {
 
 // 🔗 处理导航栏鼠标移出
 const handleNavbarMouseLeave = () => {
+  // 如果禁用自动隐藏，不启动任何计时器
+  if (props.disableAutoHide) return;
   // 如果是文档页面，启动隐藏计时器
   if (isDocPage.value && !isMobile.value) {
     startNavbarHideTimer();
@@ -604,10 +608,13 @@ onMounted(() => {
 
   // ⏱️ 启动导航栏效果计时器（页面加载3秒后开始）
   // 文档页面使用上移渐隐，普通页面使用透明度淡出
-  if (isDocPage.value && !isMobile.value) {
-    startNavbarHideTimer();
-  } else {
-    startNavbarFadeTimer();
+  // 如果禁用自动隐藏，则保持导航栏常驻
+  if (!props.disableAutoHide) {
+    if (isDocPage.value && !isMobile.value) {
+      startNavbarHideTimer();
+    } else {
+      startNavbarFadeTimer();
+    }
   }
 });
 

@@ -2,8 +2,9 @@
 // 🏠 站点概览动态数据工具 - 从 doc 目录读取文档统计、分类、标签
 
 import { existsSync, readFileSync, readdirSync, statSync } from 'fs';
-import { join } from 'path';
+import { join, relative } from 'path';
 import type { CloudItem } from '../config/site.config';
+import type { Post } from '../types/post';
 
 /* 📋 文档元数据 */
 export interface DocFrontmatter {
@@ -208,6 +209,77 @@ export function getTagCloud(dir: string): CloudItem[] {
   return Array.from(counts.entries())
     .map(([name, count]) => ({ name, count }))
     .sort((a, b) => b.count - a.count);
+}
+
+/* 🔽 读取单个文档的完整 Post 数据 */
+function getPostFromFile(filePath: string, docDir: string): Post | null {
+  if (!existsSync(filePath)) {
+    return null;
+  }
+
+  const content = readFileSync(filePath, 'utf-8');
+  const frontmatter = parseFrontmatter(content);
+
+  if (!frontmatter.title) {
+    return null;
+  }
+
+  const relativePath = relative(docDir, filePath).replace(/\\/g, '/');
+  const slug = relativePath.replace(/\.md$/, '');
+  const url = frontmatter.url ? frontmatter.url.replace(/^\//, '') : slug;
+
+  // 📝 提取描述（优先 frontmatter，否则从正文生成）
+  let description = frontmatter.description || '';
+  if (!description) {
+    const plainText = content
+      .replace(/^---[\t ]*\r?\n[^]*?\r?\n---[\t ]*\r?\n/, '')
+      .replace(/#+ /g, '')
+      .replace(/\*\*/g, '')
+      .replace(/\*/g, '')
+      .replace(/`/g, '')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      .replace(/\n/g, ' ')
+      .trim();
+    description = plainText.length > 150 ? `${plainText.slice(0, 150)}...` : plainText;
+  }
+
+  // 📅 阅读时间
+  const contentWithoutFrontmatter = content.replace(/^---[\t ]*\r?\n[^]*?\r?\n---[\t ]*\r?\n/, '');
+  const chineseChars = (contentWithoutFrontmatter.match(/[\u4e00-\u9fa5]/g) || []).length;
+  const englishWords = (contentWithoutFrontmatter.match(/[a-zA-Z]+/g) || []).length;
+  const readTime = `${Math.max(1, Math.ceil((chineseChars + englishWords) / 300))} 分钟`;
+
+  return {
+    slug,
+    title: frontmatter.title,
+    description,
+    cover: frontmatter.cover || '/assets/shiroki.avif',
+    date: frontmatter.date || new Date().toISOString().split('T')[0],
+    url: `/${url}`,
+    tags: frontmatter.tags || [],
+    category: frontmatter.category || '',
+    readTime,
+  };
+}
+
+/* 🔽 读取所有文档为 Post 列表 */
+export function getAllPosts(dir: string): Post[] {
+  const files = getAllMdFiles(dir);
+
+  return files
+    .map((filePath) => getPostFromFile(filePath, dir))
+    .filter((post): post is Post => post !== null)
+    .sort((left, right) => new Date(right.date).getTime() - new Date(left.date).getTime());
+}
+
+/* 🔽 按标签筛选文档 */
+export function getPostsByTag(dir: string, tag: string): Post[] {
+  return getAllPosts(dir).filter((post) => post.tags?.includes(tag));
+}
+
+/* 🔽 按分类筛选文档 */
+export function getPostsByCategory(dir: string, category: string): Post[] {
+  return getAllPosts(dir).filter((post) => post.category === category);
 }
 
 /* 🔽 一次性获取全部动态数据 */
